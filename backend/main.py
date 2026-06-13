@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from backend import models
+from backend.database import engine
+models.Base.metadata.create_all(bind=engine)
 app=FastAPI()
 @app.get("/")
 def root():
@@ -6,3 +9,4 @@ def root():
 @app.get("/health")
 def read_health():
     return{"status": "ok"}
+ 
