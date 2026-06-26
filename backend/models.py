@@ -5,15 +5,15 @@ class Student(Base):
     __tablename__="students"
     id=Column(Integer,primary_key=True,index=True)
     name=Column(String,nullable=False)
-    age=Column(Integer,nullable=False)
+    #age=Column(Integer,nullable=False)
     branch=Column(String)
     year=Column(Integer)
     course=Column(String)
-    ph_no=Column(Integer)
+    phone_no=Column(String)
     email=Column(String,unique=True,nullable=False)
     address=Column(String)
     password=Column(String,nullable=False)
-class fee(Base):
+class Fee(Base):
     __tablename__="Fees"
     id=Column(Integer,primary_key=True,index=True)
     student_id=Column(Integer,ForeignKey("students.id"))
