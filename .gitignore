@@ -1,0 +1,5 @@
+venv/
+__pycsche__/
+*.pyc
+.env
+smartcampus-portal/
