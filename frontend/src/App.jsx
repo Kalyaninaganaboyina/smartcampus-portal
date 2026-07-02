@@ -96,13 +96,7 @@ function App() {
             <div className="success-icon">🎉</div>
             <h2>Welcome Back, {role === 'faculty' ? 'Faculty' : 'Student'}!</h2>
             <p>Login successful. Redirecting to your dashboard...</p>
-            <button 
-              className="btn-login" 
-              onClick={handleBackToRoleSelection}
-              style={{ marginTop: '20px' }}
-            >
-              Logout / Reset
-            </button>
+            
           </div>
         ) : (
           <>
