@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 
 function App() {
+  const [role, setRole] = useState(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -40,30 +41,19 @@ function App() {
     }, 1500)
   }
 
-  const handleReset = () => {
+  const handleBackToRoleSelection = () => {
+    setRole(null)
     setEmail('')
     setPassword('')
     setErrors({})
     setIsSuccess(false)
+    setShowPassword(false)
   }
 
   return (
     <div className="login-wrapper">
       <div className="login-card">
-        {isSuccess ? (
-          <div className="success-banner">
-            <div className="success-icon">🎉</div>
-            <h2>Welcome Back!</h2>
-            <p>Login successful. Redirecting to your dashboard...</p>
-            <button 
-              className="btn-login" 
-              onClick={handleReset}
-              style={{ marginTop: '20px' }}
-            >
-              Logout / Reset
-            </button>
-          </div>
-        ) : (
+        {role === null ? (
           <>
             {/* Header */}
             <div className="brand-header">
@@ -73,20 +63,90 @@ function App() {
                 <h1 className="brand-title-main">Portal</h1>
               </div>
             </div>
-            <p className="brand-subtitle">Student/Parent Login</p>
+            <p className="brand-subtitle">Select your portal to log in</p>
+
+            <div className="role-selection-container">
+              <button 
+                type="button" 
+                className="role-card" 
+                onClick={() => setRole('faculty')}
+              >
+                <div className="role-icon">👨‍🏫</div>
+                <div className="role-details">
+                  <span className="role-title">Faculty Portal</span>
+                  <span className="role-desc">Sign in to manage classes, grades, and schedules</span>
+                </div>
+              </button>
+
+              <button 
+                type="button" 
+                className="role-card" 
+                onClick={() => setRole('student')}
+              >
+                <div className="role-icon">🎓</div>
+                <div className="role-details">
+                  <span className="role-title">Student / Parent Portal</span>
+                  <span className="role-desc">Sign in to view classes, academic records, and fees</span>
+                </div>
+              </button>
+            </div>
+          </>
+        ) : isSuccess ? (
+          <div className="success-banner">
+            <div className="success-icon">🎉</div>
+            <h2>Welcome Back, {role === 'faculty' ? 'Faculty' : 'Student'}!</h2>
+            <p>Login successful. Redirecting to your dashboard...</p>
+            <button 
+              className="btn-login" 
+              onClick={handleBackToRoleSelection}
+              style={{ marginTop: '20px' }}
+            >
+              Logout / Reset
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Back Button */}
+            <button 
+              type="button" 
+              className="back-btn" 
+              onClick={handleBackToRoleSelection}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>Back</span>
+            </button>
+
+            {/* Header */}
+            <div className="brand-header">
+              <span className="brand-logo" role="img" aria-label="Graduation Cap">
+                {role === 'faculty' ? '💼' : '🎓'}
+              </span>
+              <div className="brand-text-container">
+                <h1 className="brand-title-main">Smart Campus</h1>
+                <h1 className="brand-title-main">Portal</h1>
+              </div>
+            </div>
+            <p className="brand-subtitle">
+              {role === 'faculty' ? 'Faculty Login' : 'Student/Parent Login'}
+            </p>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="login-form" noValidate>
               
               {/* Email Field */}
               <div className="form-group">
-                <label htmlFor="email" className="form-label">Email</label>
+                <label htmlFor="email" className="form-label">
+                  {role === 'faculty' ? 'Faculty Email' : 'Email'}
+                </label>
                 <div className="input-container">
                   <input
                     type="email"
                     id="email"
                     className={`form-input ${errors.email ? 'input-error' : ''}`}
-                    placeholder="Enter your email"
+                    placeholder={role === 'faculty' ? "faculty@campus.edu" : "Enter your email"}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value)
