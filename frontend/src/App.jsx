@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import './App.css'
+import './Login.css'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
 function App() {
   const [role, setRole] = useState(null)
@@ -38,6 +40,14 @@ function App() {
     setTimeout(() => {
       setIsLoading(false)
       setIsSuccess(true)
+      const name = email.split('@')[0] || (role === 'faculty' ? 'Faculty' : 'Student')
+      localStorage.setItem('studentName', name)
+      localStorage.setItem('role', role)
+      if (role === 'student') {
+        window.location.href = '/hero'
+      } else if (role === 'faculty') {
+        window.location.href = '/faculty'
+      }
     }, 1500)
   }
 
@@ -140,7 +150,7 @@ function App() {
                     type="email"
                     id="email"
                     className={`form-input ${errors.email ? 'input-error' : ''}`}
-                    placeholder={role === 'faculty' ? "faculty@campus.edu" : "Enter your email"}
+                    placeholder={role === 'faculty' ? "faculty@campus.edu" : "studentrollno@amritasai.orgg.in"}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value)

@@ -1,0 +1,143 @@
+/* Minimal styles for login UI */
+.login-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: transparent;
+  padding: 24px 16px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 460px;
+  background: rgba(15, 23, 42, 0.95);
+  color: #f8fafc;
+  border-radius: 36px;
+  box-shadow: 0 32px 80px rgba(15,24,40,0.35);
+  padding: 32px 28px;
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(24px);
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-title-main {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #e6ebf0;
+}
+
+.brand-subtitle {
+  color: #cbd5e1;
+  margin: 12px 0 24px;
+}
+
+.role-selection-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.role-card {
+  flex: 1;
+  padding: 18px 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  background: rgba(255,255,255,0.05);
+  color: #f8fafc;
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.role-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(59,130,246,0.45);
+  background: rgba(255,255,255,0.1);
+}
+
+.role-card .role-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.role-card .role-desc {
+  display: block;
+  font-size: 0.95rem;
+  color: #cbd5e1;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.6rem;
+  color: #f8fafc;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.08);
+  color: #f8fafc;
+}
+
+.form-input::placeholder {
+  color: #cbd5e1;
+}
+
+.back-btn {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #f8fafc;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 10px 14px;
+  border-radius: 18px;
+  margin-bottom: 16px;
+}
+
+.success-banner {
+  text-align: center;
+  padding: 18px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.32);
+  border-radius: 20px;
+  color: #d1fae5;
+}
+
+@media (max-width: 500px) {
+  .login-card {
+    padding: 24px 18px;
+    border-radius: 28px;
+  }
+
+  .brand-title-main {
+    font-size: 1.5rem;
+  }
+
+  .brand-subtitle {
+    margin-bottom: 20px;
+  }
+
+  .form-input {
+    padding: 12px 14px;
+  }
+
+  .btn-login {
+    padding: 14px;
+  }
+}
+
