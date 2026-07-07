@@ -1,5 +1,6 @@
 from sqlalchemy import Column,Integer,String,Float,ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
+from  .database import Base
 Base=declarative_base()
 class Student(Base):
     __tablename__="student"
@@ -33,3 +34,11 @@ class Attendance(Base):
     total_days=Column(Integer)
     attended_days=Column(Integer)
     absent_days=Column(Integer)
+    
+class Admin(Base):
+    __tablename__="admins"
+
+    id=Column(Integer,primary_key=True,index=True)
+    name=Column(String,nullable=False)
+    email=Column(String,unique=True,index=True,nullable=False)
+    password=Column(String,nullable=False)
