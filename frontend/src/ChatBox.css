@@ -138,9 +138,127 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.voice-btn {
+  width: 58px;
+  min-width: 58px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fbbf24;
+}
+
+.voice-btn.recording {
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.4);
+  color: #fff;
+}
+
+.mic-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Speech-to-Speech visual waveform styles */
+.voice-active-waves {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 20px;
+  width: 100%;
+}
+
+.wave-bar {
+  width: 3px;
+  height: 100%;
+  background-color: #ffffff;
+  border-radius: 2px;
+  animation: bounce 0.8s ease-in-out infinite alternate;
+}
+
+.wave-bar:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.wave-bar:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes bounce {
+  0% {
+    transform: scaleY(0.3);
+  }
+  100% {
+    transform: scaleY(1.1);
+  }
+}
+
+/* ChatBox Header Speech-to-Speech Toggle Button */
+.chatbox-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.s2s-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.s2s-toggle-btn.active {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: rgba(251, 191, 36, 0.6);
+  color: #fff;
+  box-shadow: 0 0 16px rgba(251, 191, 36, 0.2);
+}
+
+.s2s-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.24);
+  transform: translateY(-1px);
+}
+
+.s2s-toggle-btn.active:hover {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: rgba(251, 191, 36, 0.8);
+}
+
+.s2s-icon {
+  width: 14px;
+  height: 14px;
+  stroke-width: 2.2px;
+}
+
 .chatbox-input button:hover {
   transform: translateY(-1px);
   box-shadow: 0 20px 40px rgba(251, 191, 36, 0.2);
+}
+
+
+.chatbox-error {
+  padding: 12px 18px;
+  margin: 0 24px 18px;
+  border-radius: 18px;
+  background: rgba(220, 38, 38, 0.14);
+  color: #fee2e2;
+  font-size: 0.92rem;
+  border: 1px solid rgba(220, 38, 38, 0.28);
 }
 
 @media (max-width: 900px) {
@@ -175,5 +293,14 @@
 
   .chatbox-input button {
     width: 100%;
+  }
+
+  .s2s-label {
+    display: none;
+  }
+
+  .s2s-toggle-btn {
+    padding: 8px;
+    border-radius: 50%;
   }
 }
