@@ -4,6 +4,8 @@ from backend import models,schemas
 from backend.database import get_db
 from backend.auth import hash_password,verify_password,create_access_token
 import pandas as pd
+
+from backend.routes import student
 router=APIRouter(prefix="/admin",tags=["Admin"])
 
 # Register Admin
@@ -28,6 +30,25 @@ def login_admin(admin: schemas.AdminLogin, db: Session = Depends(get_db)):
     access_token = create_access_token(data={"sub": db_admin.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
+@router.post("/upload-students")
+def upload_students(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    df = pd.read_csv(file.file)
+    for _, row in df.iterrows():
+        student = models.Student(
+            reg_number=row["reg_number"],
+            name=row["name"],
+            email=row["email"],
+            branch=row["branch"],
+            year=row["year"],
+            course=row["course"],
+            phone_no=row["phone_no"],
+            address=row["address"],
+            password=hash_password(row["password"])  # or generate random
+        )
+        db.add(student)
+    db.commit()
+    return {"message": "Students uploaded successfully"}
+
 @router.post("/upload-marks")
 def upload_marks(file: UploadFile = File(...), db: Session = Depends(get_db)):
     if not file.filename.endswith(".csv"):
@@ -35,13 +56,18 @@ def upload_marks(file: UploadFile = File(...), db: Session = Depends(get_db)):
 
     df = pd.read_csv(file.file)
 
-    required_columns = {"student_id", "subject", "internal_marks", "external_marks"}
+    required_columns = {"reg_number", "subject", "internal_marks", "external_marks"}
     if not required_columns.issubset(df.columns):
-        raise HTTPException(status_code=400, detail="CSV must contain student_id, subject, internal_marks, external_marks")
+        raise HTTPException(status_code=400, detail="CSV must contain reg_number, subject, internal_marks, external_marks")
 
     for _, row in df.iterrows():
+        student = db.query(models.Student).filter(models.Student.reg_number ==row["reg_number"]).first()
+        if not student:
+            raise HTTPException(status_code=400, detail=f"Student with ID {row['reg_number']} not found")
+
         new_mark = models.Marks(
-            student_id=row["student_id"],
+            student_id=student.id,
+            reg_number=student.reg_number,
             subject=row["subject"],
             internal_marks=row["internal_marks"],
             external_marks=row["external_marks"]
@@ -55,13 +81,18 @@ def upload_attendance(file: UploadFile = File(...), db: Session = Depends(get_db
         raise HTTPException(status_code=400, detail="Only CSV files are allowed")
 
     df = pd.read_csv(file.file)
-    required_columns = {"student_id", "total_days", "attended_days", "absent_days"}
+    required_columns = {"reg_number", "total_days", "attended_days", "absent_days"}
     if not required_columns.issubset(df.columns):
-        raise HTTPException(status_code=400, detail="CSV must contain,student_id, total_days, attended_days, absent_days")
+        raise HTTPException(status_code=400, detail="CSV must contain,reg_number, total_days, attended_days, absent_days")
 
     for _, row in df.iterrows():
+        student = db.query(models.Student).filter(models.Student.reg_number == row["reg_number"]).first()
+        if not student:
+            raise HTTPException(status_code=400, detail=f"Student with reg_number {row['reg_number']} not found")
+
         new_attendance = models.Attendance(
-            student_id =int(row["student_id"]),
+            student_id=student.id,
+            reg_number=student.reg_number,
             total_days=int(row["total_days"]),
             attended_days=int(row["attended_days"]),
             absent_days=int(row["absent_days"])
@@ -75,13 +106,18 @@ def upload_fees(file: UploadFile = File(...), db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Only CSV files are allowed")
 
     df = pd.read_csv(file.file)
-    required_columns = {"student_id", "total_fee", "paid_fee", "due_fee"}
+    required_columns = {"reg_number", "total_fee", "paid_fee", "due_fee"}
     if not required_columns.issubset(df.columns):
-        raise HTTPException(status_code=400, detail="CSV must contain student_id, total_fee, paid_fee, due_fee")
+        raise HTTPException(status_code=400, detail="CSV must contain reg_number, total_fee, paid_fee, due_fee")
 
     for _, row in df.iterrows():
+        student = db.query(models.Student).filter(models.Student.reg_number == row["reg_number"]).first()
+        if not student:
+            raise HTTPException(status_code=400, detail=f"Student with reg_number {row['reg_number']} not found")
+
         new_fee = models.Fee(
-            student_id=int(row["student_id"]),
+            student_id=student.id,
+            reg_number=student.reg_number,
             total_fee=float(row["total_fee"]),
             paid_fee=float(row["paid_fee"]),
             due_fee=float(row["due_fee"])

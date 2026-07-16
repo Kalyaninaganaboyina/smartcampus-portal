@@ -1,5 +1,3 @@
-student_id,total_days,attended_days,absent_days
-1,23,12,11
-2,23,21,2
- 
- 
+reg_number,total_days,attended_days,absent_days
+23AJ1A0501,100,90,10
+23AJ1A0502,95,80,15

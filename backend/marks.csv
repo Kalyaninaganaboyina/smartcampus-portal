@@ -1,9 +1,3 @@
-student_id,subject,internal_marks,external_marks
-1,Maths,45,78
-1,Python,48,82
-2,Maths,32,55
-2,Python,40,71
-1,English,23,45
-1,Iot,54,65
-2,English,45,65
-2,Iot,77,66
+reg_number,subject,internal_marks,external_marks
+23AJ1A0501,Maths,25,60
+23AJ1A0502,Physics,20,55

@@ -1,19 +1,9 @@
 from pydantic import BaseModel,EmailStr
-class StudentRegister(BaseModel):
-    name:str
-    email:EmailStr
-    password:str
-    branch:str
-    year:int
-    course:str
-    phone_no:str
-    address:str
+ 
 class StudentLogin(BaseModel):
     email:EmailStr
     password:str
-class TokenResponse(BaseModel):
-    access_token:str
-    token_type:str
+ 
 class AdminRegister(BaseModel):
     name:str
     email:EmailStr
@@ -21,10 +11,25 @@ class AdminRegister(BaseModel):
 class AdminLogin(BaseModel):
     email:EmailStr
     password:str
+class TokenResponse(BaseModel):
+    access_token:str
+    token_type:str
 class AdminResponse(BaseModel):
     id:int
     name:str
     email:EmailStr
+    class Config:
+        from_attributes = True
+class StudentResponse(BaseModel):
+    id: int
+    reg_number: str   # ✅ include reg_number in response
+    name: str
+    email: EmailStr
+    branch: str
+    year: int
+    course: str
+    phone_no: str
+    address: str
     class Config:
         from_attributes = True
 class MarksCreate(BaseModel):

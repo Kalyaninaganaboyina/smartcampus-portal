@@ -1,0 +1,3 @@
+reg_number,name,email,branch,year,course,phone_no,address,password
+23AJ1A0501,Ravi Kumar,ravi@example.com,CSE,3,B.Tech,9876543210,Hyderabad,pass123
+23AJ1A0502,Anita Sharma,anita@example.com,ECE,2,B.Tech,9876543220,Vizag,pass456

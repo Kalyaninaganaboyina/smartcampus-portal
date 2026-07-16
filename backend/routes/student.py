@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models import Student,Marks,Attendance,Fee
@@ -8,6 +8,7 @@ router=APIRouter()
 def get_profile(current_student:Student =Depends(get_current_student)):
     return{
         "id":current_student.id,
+        "reg_number":current_student.reg_number,
         "name":current_student.name,
         "email":current_student.email,
         "branch":current_student.branch,
@@ -22,10 +23,10 @@ def get_marks(
     db:Session=Depends(get_db)
 ):
     marks=db.query(Marks).filter(
-        Marks.student_id == current_student.id
+        Marks.reg_number == current_student.reg_number
     ).all()
     if not marks:
-        return {"message":"No marks found","marks":[]}
+       raise HTTPException(status_code=404, detail="No marks found")  
     return {
         "student":current_student.name,
         "marks":[
@@ -47,7 +48,7 @@ def get_attendance(
         Attendance.student_id == current_student.id
     ).all()
     if not attendance:
-        return {"message": "No attendance records found", "attendance": []}
+       raise HTTPException(status_code=404, detail="No attendance records found")
     return {
         "student": current_student.name,
         "attendance": [
@@ -71,7 +72,7 @@ def get_fees(
         Fee.student_id ==current_student.id
     ).first()
     if not fees:
-        return {"message":"No fee details found"}
+        raise HTTPException(status_code=404, detail="No fee details found")
     return {
         "student":current_student.name,
         "total_fee":fees.total_fee,
