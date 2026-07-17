@@ -1,16 +1,117 @@
 import { useState } from 'react'
 import './App.css'
 import './Login.css'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 
-function App() {
-  const [role, setRole] = useState(null)
+function SetNameModal({ token, onComplete }) {
+  const [name, setName] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const trimmed = name.trim()
+    if (!trimmed) { setError('Please enter your full name'); return }
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch('http://localhost:8000/student/set-name', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: trimmed }),
+      })
+      if (!res.ok) {
+        const d = await res.json().catch(() => null)
+        throw new Error(d?.detail || 'Failed to save name')
+      }
+      const data = await res.json()
+      onComplete(data.name)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 9999,
+      background: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center'
+    }}>
+      <div style={{
+        background: 'rgba(255,255,255,0.06)',
+        backdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255,255,255,0.15)',
+        borderRadius: '24px',
+        padding: '48px 40px',
+        width: '100%', maxWidth: '420px',
+        boxShadow: '0 32px 64px rgba(0,0,0,0.5)',
+        textAlign: 'center'
+      }}>
+        <div style={{ fontSize: '56px', marginBottom: '16px' }}>👋</div>
+        <h2 style={{ color: '#fff', fontSize: '26px', fontWeight: 700, margin: '0 0 8px' }}>
+          Welcome to Smart Campus!
+        </h2>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '15px', margin: '0 0 32px' }}>
+          Please enter your full name to complete your profile setup.
+        </p>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Enter your full name"
+            value={name}
+            onChange={e => { setName(e.target.value); setError('') }}
+            autoFocus
+            style={{
+              width: '100%', padding: '14px 18px',
+              background: 'rgba(255,255,255,0.1)',
+              border: '1.5px solid rgba(255,255,255,0.2)',
+              borderRadius: '12px', color: '#fff',
+              fontSize: '16px', outline: 'none',
+              boxSizing: 'border-box',
+              transition: 'border-color 0.2s',
+            }}
+            onFocus={e => e.target.style.borderColor = '#7c6af7'}
+            onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.2)'}
+          />
+          {error && (
+            <p style={{ color: '#ff6b6b', fontSize: '13px', margin: '8px 0 0', textAlign: 'left' }}>
+              ⚠ {error}
+            </p>
+          )}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              marginTop: '20px', width: '100%', padding: '14px',
+              background: loading ? 'rgba(124,106,247,0.5)' : 'linear-gradient(135deg, #7c6af7, #a78bfa)',
+              border: 'none', borderRadius: '12px', color: '#fff',
+              fontSize: '16px', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s', letterSpacing: '0.3px',
+            }}
+          >
+            {loading ? 'Saving...' : 'Continue to Dashboard →'}
+          </button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+function App({ initialRole = null }) {
+  const [role, setRole] = useState(initialRole)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState({})
+  const [loginError, setLoginError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+  const [showNameModal, setShowNameModal] = useState(false)
+  const [pendingToken, setPendingToken] = useState('')
 
   const validateForm = () => {
     const tempErrors = {}
@@ -30,26 +131,114 @@ function App() {
     return Object.keys(tempErrors).length === 0
   }
 
-  const handleSubmit = (e) => {
+  const fetchStudentProfile = async (token) => {
+    const response = await fetch('http://localhost:8000/student/profile', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    if (!response.ok) {
+      throw new Error('Unable to fetch student profile.')
+    }
+    return response.json()
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!validateForm()) return
 
     setIsLoading(true)
-    
-    // Simulate authentication API call
+    setLoginError('')
+
+    if (role === 'student') {
+      try {
+        const response = await fetch('http://localhost:8000/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        })
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null)
+          throw new Error(errorData?.detail || 'Invalid login credentials')
+        }
+        const data = await response.json()
+        localStorage.setItem('token', data.access_token)
+        localStorage.setItem('role', 'student')
+        localStorage.setItem('studentEmail', email)
+        localStorage.setItem('studentBranch', '')
+        localStorage.setItem('studentYear', '')
+        localStorage.setItem('studentCourse', '')
+
+        if (!data.name_set) {
+          // First login — show name modal before entering the portal
+          setPendingToken(data.access_token)
+          setShowNameModal(true)
+          setIsLoading(false)
+          return
+        }
+
+        // Name already set — fetch profile and proceed
+        const profile = await fetchStudentProfile(data.access_token)
+        localStorage.setItem('studentName', profile.name || profile.email)
+        localStorage.setItem('studentBranch', profile.branch || '')
+        localStorage.setItem('studentYear', profile.year?.toString() || '')
+        localStorage.setItem('studentCourse', profile.course || '')
+        setIsSuccess(true)
+        window.location.href = '/hero'
+      } catch (err) {
+        setLoginError(err.message)
+      } finally {
+        setIsLoading(false)
+      }
+      return
+    }
+
+    if (role === 'admin') {
+      try {
+        const response = await fetch('http://localhost:8000/admin/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        })
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => null)
+          throw new Error(errorData?.detail || 'Invalid admin credentials')
+        }
+        const data = await response.json()
+        localStorage.setItem('token', data.access_token)
+        localStorage.setItem('role', 'admin')
+        localStorage.setItem('studentName', email.split('@')[0] || 'Admin')
+        setIsSuccess(true)
+        window.location.replace('/admin')
+      } catch (err) {
+        setLoginError(err.message)
+      } finally {
+        setIsLoading(false)
+      }
+      return
+    }
+
     setTimeout(() => {
       setIsLoading(false)
       setIsSuccess(true)
       const name = email.split('@')[0] || (role === 'faculty' ? 'Faculty' : 'Student')
       localStorage.setItem('studentName', name)
+      localStorage.setItem('studentEmail', email)
+      localStorage.setItem('studentPassword', password)
       localStorage.setItem('role', role)
-      if (role === 'student') {
-        window.location.href = '/hero'
-      } else if (role === 'faculty') {
-        window.location.href = '/faculty'
-      }
+      if (!localStorage.getItem('studentBranch')) localStorage.setItem('studentBranch', '')
+      if (!localStorage.getItem('studentYear')) localStorage.setItem('studentYear', '')
+      if (!localStorage.getItem('studentCourse')) localStorage.setItem('studentCourse', '')
+      window.location.href = role === 'faculty' ? '/faculty' : '/hero'
     }, 1500)
   }
+
+  const handleNameSet = (savedName) => {
+    localStorage.setItem('studentName', savedName)
+    setShowNameModal(false)
+    window.location.href = '/hero'
+  }
+
 
   const handleBackToRoleSelection = () => {
     setRole(null)
@@ -62,6 +251,9 @@ function App() {
 
   return (
     <div className="login-wrapper">
+      {showNameModal && (
+        <SetNameModal token={pendingToken} onComplete={handleNameSet} />
+      )}
       <div className="login-card">
         {role === null ? (
           <>
@@ -99,12 +291,14 @@ function App() {
                   <span className="role-desc">Sign in to view classes, academic records, and fees</span>
                 </div>
               </button>
+
+              
             </div>
           </>
         ) : isSuccess ? (
           <div className="success-banner">
             <div className="success-icon">🎉</div>
-            <h2>Welcome Back, {role === 'faculty' ? 'Faculty' : 'Student'}!</h2>
+            <h2>Welcome Back, {role === 'faculty' ? 'Faculty' : role === 'admin' ? 'Admin' : 'Student'}!</h2>
             <p>Login successful. Redirecting to your dashboard...</p>
             
           </div>
@@ -134,23 +328,36 @@ function App() {
               </div>
             </div>
             <p className="brand-subtitle">
-              {role === 'faculty' ? 'Faculty Login' : 'Student/Parent Login'}
+              {role === 'faculty'
+                ? 'Faculty Login'
+                : role === 'admin'
+                ? 'Admin Login'
+                : 'Student/Parent Login'}
             </p>
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="login-form" noValidate>
+              {loginError && (
+                <div className="login-error">{loginError}</div>
+              )}
               
               {/* Email Field */}
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
-                  {role === 'faculty' ? 'Faculty Email' : 'Email'}
+                  {role === 'faculty' ? 'Faculty Email' : role === 'admin' ? 'Admin Email' : 'Email'}
                 </label>
                 <div className="input-container">
                   <input
                     type="email"
                     id="email"
                     className={`form-input ${errors.email ? 'input-error' : ''}`}
-                    placeholder={role === 'faculty' ? "faculty@campus.edu" : "studentrollno@amritasai.orgg.in"}
+                    placeholder={
+                      role === 'faculty'
+                        ? 'faculty@campus.edu'
+                        : role === 'admin'
+                        ? 'admin@campus.edu'
+                        : 'studentrollno@amritasai.orgg.in'
+                    }
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value)

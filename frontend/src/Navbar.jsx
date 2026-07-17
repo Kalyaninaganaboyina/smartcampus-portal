@@ -6,11 +6,26 @@ function Navbar({ role = 'student', onDashboardClick, onProfileClick, studentNam
   const [isNavMenuOpen, setIsNavMenuOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
 
-  const basePath = role === 'faculty' ? '/faculty' : '/hero'
+  const basePath = role === 'faculty' ? '/faculty' : role === 'admin' ? '/admin' : '/hero'
   const handleDashboard = () => {
     setIsNavMenuOpen(false)
     if (onDashboardClick) onDashboardClick()
     else window.location.href = `${basePath}`
+  }
+
+  const handleUploadMarks = () => {
+    setIsNavMenuOpen(false)
+    window.location.href = '/admin#marks'
+  }
+
+  const handleUploadAttendance = () => {
+    setIsNavMenuOpen(false)
+    window.location.href = '/admin#attendance'
+  }
+
+  const handleUploadFees = () => {
+    setIsNavMenuOpen(false)
+    window.location.href = '/admin#fees'
   }
 
   const handleAttendance = () => {
@@ -86,6 +101,12 @@ function Navbar({ role = 'student', onDashboardClick, onProfileClick, studentNam
                 <button onClick={handleQuestionPapers}>Question Papers</button>
                 <button onClick={handleResources}>Resources</button>
                 <button onClick={handleSchedule}>Schedule</button>
+              </>
+            ) : role === 'admin' ? (
+              <>
+                <button onClick={handleUploadMarks}>Upload Marks</button>
+                <button onClick={handleUploadAttendance}>Upload Attendance</button>
+                <button onClick={handleUploadFees}>Upload Fees</button>
               </>
             ) : (
               <>

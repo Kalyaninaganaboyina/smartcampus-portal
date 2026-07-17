@@ -1,0 +1,15 @@
+# Smart Campus Portal rules
+
+## Tech Stack Overview
+- **Backend:** FastAPI (Python), located in the `backend/` folder.
+- **Frontend:** React, Vite (JavaScript), located in the `frontend/` folder.
+- **Database:** SQLite, file path is `backend/smartcampus.db`. Uses SQLAlchemy ORM.
+
+## Local Ports
+- **Backend API:** Runs on `http://localhost:8000`.
+- **Frontend App:** Runs on `http://localhost:5173`.
+
+## Guidelines
+- Keep user interfaces clean, responsive, and aesthetically premium (utilize sleek gradients, hover animations, and cohesive color schemes).
+- Preserve existing code comments and structure unless specifically asked to refactor.
+- Always verify endpoint integration when modifying API routes in the backend or fetch handlers in the React frontend.

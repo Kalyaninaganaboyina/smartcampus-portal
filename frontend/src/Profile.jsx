@@ -9,9 +9,7 @@ function Profile() {
     email: '',
     branch: '',
     year: '',
-    course: '',
-    phone: '',
-    address: ''
+    course: ''
   })
   const [editMode, setEditMode] = useState(false)
   const [passwordMode, setPasswordMode] = useState(false)
@@ -33,14 +31,12 @@ function Profile() {
           if (!response.ok) throw new Error('Failed to load profile')
           const data = await response.json()
           setProfile({
-            studentName: data.name || 'Student',
+            studentName: data.name || data.email || 'Student',
             role: storedRole,
             email: data.email || '',
             branch: data.branch || '',
             year: data.year?.toString() || '',
             course: data.course || '',
-            phone: data.phone_no || '',
-            address: data.address || '',
           })
           return
         } catch (error) {
@@ -55,8 +51,6 @@ function Profile() {
         branch: localStorage.getItem('studentBranch') || '',
         year: localStorage.getItem('studentYear') || '',
         course: localStorage.getItem('studentCourse') || '',
-        phone: localStorage.getItem('studentPhone') || '',
-        address: localStorage.getItem('studentAddress') || '',
       })
     }
 
@@ -75,8 +69,6 @@ function Profile() {
     localStorage.setItem('studentBranch', profileData.branch)
     localStorage.setItem('studentYear', profileData.year)
     localStorage.setItem('studentCourse', profileData.course)
-    localStorage.setItem('studentPhone', profileData.phone)
-    localStorage.setItem('studentAddress', profileData.address)
   }
 
   const handleSave = async (e) => {
@@ -93,13 +85,10 @@ function Profile() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            name: profile.studentName,
             email: profile.email,
             branch: profile.branch,
             year: profile.year ? Number(profile.year) : undefined,
             course: profile.course,
-            phone_no: profile.phone,
-            address: profile.address,
           }),
         })
 
@@ -115,8 +104,6 @@ function Profile() {
           branch: data.branch || profile.branch,
           year: data.year?.toString() || profile.year,
           course: data.course || profile.course,
-          phone: data.phone_no || profile.phone,
-          address: data.address || profile.address,
         }
         setProfile(updatedProfile)
         saveProfileToStorage(updatedProfile)
@@ -241,32 +228,11 @@ function Profile() {
 
             <form onSubmit={handleSave} style={{ marginTop: 28, display: 'grid', gap: 20 }}>
               <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-                {formField('Full Name', 'studentName', 'text', 'Enter your name')}
                 {formField('Email', 'email', 'email', 'name@example.com')}
-                {formField('Phone', 'phone', 'tel', '123-456-7890')}
                 {formField('Branch', 'branch', 'text', 'Computer Science')}
                 {formField('Year', 'year', 'number', '2')}
                 {formField('Course', 'course', 'text', 'B.Tech')}
               </div>
-              <label style={{ display: 'block', marginBottom: 16 }}>
-                <div style={{ marginBottom: 8, color: '#334155', fontWeight: 700 }}>Address</div>
-                <textarea
-                  value={profile.address}
-                  disabled={!editMode}
-                  onChange={(e) => handleChange('address', e.target.value)}
-                  placeholder="Enter your address"
-                  rows={4}
-                  style={{
-                    width: '100%',
-                    padding: '14px 16px',
-                    borderRadius: 14,
-                    border: '1px solid #cbd5e1',
-                    background: editMode ? '#fff' : '#f8fafc',
-                    color: '#0f172a',
-                    resize: 'vertical'
-                  }}
-                />
-              </label>
               {feedback && (
                 <div style={{ padding: 16, borderRadius: 16, background: '#ecfdf5', color: '#166534', border: '1px solid #d1fae5' }}>
                   {feedback}

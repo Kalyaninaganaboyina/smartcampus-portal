@@ -25,8 +25,8 @@ function Hero() {
               and stay connected with announcements.
             </p>
             <div className="hero-actions">
-              <button className="hero-btn primary" type="button">Open Dashboard</button>
-              <button className="hero-btn secondary" type="button">View Attendance</button>
+              <button className="hero-btn primary" type="button" onClick={() => window.location.href = '/dashboard'}>Open Dashboard</button>
+              <button className="hero-btn secondary" type="button" onClick={() => window.location.href = '/attendance'}>View Attendance</button>
               {role === 'student' && (
                 <button className="hero-btn chat" type="button" onClick={toggleChat}>
                   {isChatOpen ? 'Hide Chat' : 'Open Chat'}
@@ -60,21 +60,23 @@ function Hero() {
               </div>
 
               <div className="hero-cards">
-                <div className="hero-card">
+                <div className="hero-card" onClick={() => window.location.href = '/dashboard'} style={{ cursor: 'pointer' }}>
                   <div className="hero-card-title">Next Assignment</div>
                   <p className="hero-card-text">Submit your AI coursework by Next class to keep your streak going.</p>
-                  <div className="hero-card-cta">See details</div>
+                  <div className="hero-card-cta">See details →</div>
                 </div>
-                <div className="hero-card">
+                <div className="hero-card" onClick={() => window.location.href = '/percentage'} style={{ cursor: 'pointer' }}>
                   <div className="hero-card-title">Upcoming Quiz</div>
                   <p className="hero-card-text">Prepare for the data structures quiz scheduled for Tuesday.</p>
-                  <div className="hero-card-cta">Review topics</div>
+                  <div className="hero-card-cta">Review topics →</div>
                 </div>
-                <div className="hero-card">
-                  <div className="hero-card-title">Messages</div>
-                  <p className="hero-card-text">Chat with your mentor or class representatives directly.</p>
-                  <div className="hero-card-cta">Open chat</div>
-                </div>
+                {role === 'student' && (
+                  <div className="hero-card" onClick={toggleChat} style={{ cursor: 'pointer' }}>
+                    <div className="hero-card-title">Messages</div>
+                    <p className="hero-card-text">Chat with your mentor or class representatives directly.</p>
+                    <div className="hero-card-cta">Open chat →</div>
+                  </div>
+                )}
               </div>
             </div>
           </aside>
