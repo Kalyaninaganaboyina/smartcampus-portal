@@ -1,0 +1,32 @@
+services:
+  # 1. FastAPI Backend (Web Service)
+  - type: web
+    name: smartcampus-backend
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:///backend/smartcampus.db
+      - key: SECRET_KEY
+        generateValue: true
+
+  # 2. React Frontend (Static Site)
+  - type: web
+    name: smartcampus-frontend
+    runtime: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: smartcampus-backend
+          type: web
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

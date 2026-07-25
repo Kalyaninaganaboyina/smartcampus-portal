@@ -5,7 +5,7 @@ Base=declarative_base()
 class Student(Base):
     __tablename__="student"
     id=Column(Integer,primary_key=True,index=True)
-    reg_number=Column(String,unique=True,index=True,nullable=False)
+    reg_number=Column("roll_number",String,unique=True,index=True,nullable=False)
     name=Column(String,nullable=False)
    # age=Column(Integer,nullable=False)
     branch=Column(String)
@@ -15,6 +15,11 @@ class Student(Base):
     email=Column(String,unique=True,nullable=False)
     address=Column(String)
     password=Column(String,nullable=False)
+    bio_pdf_path=Column(String)
+
+    @property
+    def roll_number(self) -> str:
+        return self.reg_number
 class Fee(Base):
     __tablename__="fees"
     id=Column(Integer,primary_key=True,index=True)
@@ -47,3 +52,25 @@ class Admin(Base):
     name=Column(String,nullable=False)
     email=Column(String,unique=True,index=True,nullable=False)
     password=Column(String,nullable=False)
+
+class Faculty(Base):
+    __tablename__="faculty"
+
+    id=Column(Integer,primary_key=True,index=True)
+    name=Column(String,nullable=False)
+    email=Column(String,unique=True,index=True,nullable=False)
+    password=Column(String,nullable=False)
+    department=Column(String,nullable=False)
+    designation=Column(String)
+    phone_no=Column(String)
+    address=Column(String)
+
+class UploadedPDF(Base):
+    __tablename__="uploaded_pdfs"
+
+    id=Column(Integer,primary_key=True,index=True)
+    student_id=Column(Integer,ForeignKey("student.id"))
+    filename=Column(String,nullable=False)
+    filepath=Column(String,nullable=False)
+    uploaded_at=Column(String,nullable=False)
+

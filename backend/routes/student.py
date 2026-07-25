@@ -3,7 +3,40 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models import Student,Marks,Attendance,Fee
 from backend.auth import get_current_student
+from backend.schemas import SetNameRequest, StudentUpdate, StudentResponse
 router=APIRouter()
+
+@router.put("/set-name")
+def set_student_name(
+    payload: SetNameRequest,
+    current_student: Student = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    """Save the student's full name and optional branch/course/year."""
+    name = payload.name.strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Name cannot be empty")
+    current_student.name = name
+    if payload.branch:
+        current_student.branch = payload.branch.strip()
+    if payload.course:
+        current_student.course = payload.course.strip()
+    if payload.year:
+        current_student.year = payload.year
+
+    db.commit()
+    db.refresh(current_student)
+    return {
+        "message": "Student details saved successfully",
+        "id": current_student.id,
+        "reg_number": current_student.reg_number,
+        "name": current_student.name,
+        "branch": current_student.branch,
+        "course": current_student.course,
+        "year": current_student.year,
+    }
+
+
 @router.get("/profile")
 def get_profile(current_student:Student =Depends(get_current_student)):
     return{
@@ -17,6 +50,32 @@ def get_profile(current_student:Student =Depends(get_current_student)):
         "phone_no":current_student.phone_no,
         "address":current_student.address
     }
+
+@router.put("/profile", response_model=StudentResponse)
+def update_profile(
+    payload: StudentUpdate,
+    current_student: Student = Depends(get_current_student),
+    db: Session = Depends(get_db),
+):
+    if payload.name is not None:
+        current_student.name = payload.name.strip()
+    if payload.email is not None:
+        current_student.email = payload.email.strip()
+    if payload.branch is not None:
+        current_student.branch = payload.branch
+    if payload.year is not None:
+        current_student.year = payload.year
+    if payload.course is not None:
+        current_student.course = payload.course
+    if payload.phone_no is not None:
+        current_student.phone_no = payload.phone_no
+    if payload.address is not None:
+        current_student.address = payload.address
+
+    db.commit()
+    db.refresh(current_student)
+    return current_student
+
 @router.get("/profile/marks")
 def get_marks(
     current_student: Student = Depends(get_current_student),

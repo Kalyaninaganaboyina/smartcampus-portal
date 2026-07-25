@@ -1,6 +1,11 @@
 venv/
-__pycsche__/
+.venv/
+__pycache__/
 *.pyc
 .env
+backend/.env
 node_modules/
-smartcampus-portal/
+backend/smartcampus.db
+backend/smartcampus.db-shm
+backend/smartcampus.db-wal
+backend/uploads/

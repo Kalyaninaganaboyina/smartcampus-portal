@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import './App.css'
 import './Login.css'
+import { API_BASE_URL } from './config'
 
 function SetNameModal({ token, onComplete }) {
   const [name, setName] = useState('')
@@ -14,7 +15,7 @@ function SetNameModal({ token, onComplete }) {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch('http://localhost:8000/student/set-name', {
+      const res = await fetch(`${API_BASE_URL}/student/set-name`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -27,7 +28,7 @@ function SetNameModal({ token, onComplete }) {
         throw new Error(d?.detail || 'Failed to save name')
       }
       const data = await res.json()
-      onComplete(data.name)
+      onComplete(data)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -132,7 +133,7 @@ function App({ initialRole = null }) {
   }
 
   const fetchStudentProfile = async (token) => {
-    const response = await fetch('http://localhost:8000/student/profile', {
+    const response = await fetch(`${API_BASE_URL}/student/profile`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -152,7 +153,7 @@ function App({ initialRole = null }) {
 
     if (role === 'student') {
       try {
-        const response = await fetch('http://localhost:8000/auth/login', {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -165,6 +166,7 @@ function App({ initialRole = null }) {
         localStorage.setItem('token', data.access_token)
         localStorage.setItem('role', 'student')
         localStorage.setItem('studentEmail', email)
+        localStorage.setItem('isDefaultPassword', data.is_default_password ? 'true' : 'false')
         localStorage.setItem('studentBranch', '')
         localStorage.setItem('studentYear', '')
         localStorage.setItem('studentCourse', '')
@@ -183,6 +185,7 @@ function App({ initialRole = null }) {
         localStorage.setItem('studentBranch', profile.branch || '')
         localStorage.setItem('studentYear', profile.year?.toString() || '')
         localStorage.setItem('studentCourse', profile.course || '')
+        localStorage.setItem('studentRollNumber', profile.reg_number || '')
         setIsSuccess(true)
         window.location.href = '/hero'
       } catch (err) {
@@ -195,7 +198,7 @@ function App({ initialRole = null }) {
 
     if (role === 'admin') {
       try {
-        const response = await fetch('http://localhost:8000/admin/login', {
+        const response = await fetch(`${API_BASE_URL}/admin/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password }),
@@ -233,8 +236,12 @@ function App({ initialRole = null }) {
     }, 1500)
   }
 
-  const handleNameSet = (savedName) => {
-    localStorage.setItem('studentName', savedName)
+  const handleNameSet = (studentData) => {
+    localStorage.setItem('studentName', studentData.name || '')
+    localStorage.setItem('studentBranch', studentData.branch || '')
+    localStorage.setItem('studentYear', studentData.year?.toString() || '')
+    localStorage.setItem('studentCourse', studentData.course || '')
+    localStorage.setItem('studentRollNumber', studentData.reg_number || '')
     setShowNameModal(false)
     window.location.href = '/hero'
   }
@@ -261,7 +268,7 @@ function App({ initialRole = null }) {
             <div className="brand-header">
               <span className="brand-logo" role="img" aria-label="Graduation Cap">🎓</span>
               <div className="brand-text-container">
-                <h1 className="brand-title-main">Smart Campus</h1>
+                <h1 className="brand-title-main">Amrita Sai Institute of Science and Technology</h1>
                 <h1 className="brand-title-main">Portal</h1>
               </div>
             </div>
@@ -323,7 +330,7 @@ function App({ initialRole = null }) {
                 {role === 'faculty' ? '💼' : '🎓'}
               </span>
               <div className="brand-text-container">
-                <h1 className="brand-title-main">Smart Campus</h1>
+                <h1 className="brand-title-main">Amrita Sai Institute of Science and Technology</h1>
                 <h1 className="brand-title-main">Portal</h1>
               </div>
             </div>

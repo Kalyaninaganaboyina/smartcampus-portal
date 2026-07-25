@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import './ChatBox.css'
+import { API_BASE_URL } from './config'
 
 function ChatBox({ studentName, onClose }) {
   const [messages, setMessages] = useState([
@@ -160,7 +161,7 @@ function ChatBox({ studentName, onClose }) {
     setIsTyping(true)
 
     try {
-      const response = await fetch('http://localhost:8000/chat', {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

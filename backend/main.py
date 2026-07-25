@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend import models
 from backend.database import engine
-from backend.routes import auth,student,admin
+from backend.routes import auth,student,admin,chat
 models.Base.metadata.create_all(bind=engine)
 
 def run_migrations():
@@ -25,11 +25,27 @@ def run_migrations():
             conn.execute(text("ALTER TABLE student ADD COLUMN roll_number VARCHAR"))
         conn.commit()
 
-        # Check marks table for subject
+        # Check marks table for subject and reg_number
         res = conn.execute(text("PRAGMA table_info(marks)"))
         columns = [row[1] for row in res.fetchall()]
         if "subject" not in columns:
             conn.execute(text("ALTER TABLE marks ADD COLUMN subject VARCHAR"))
+        if "reg_number" not in columns:
+            conn.execute(text("ALTER TABLE marks ADD COLUMN reg_number VARCHAR"))
+        conn.commit()
+
+        # Check attendance table for reg_number
+        res = conn.execute(text("PRAGMA table_info(attendance)"))
+        columns = [row[1] for row in res.fetchall()]
+        if "reg_number" not in columns:
+            conn.execute(text("ALTER TABLE attendance ADD COLUMN reg_number VARCHAR"))
+            conn.commit()
+
+        # Check fees table for reg_number
+        res = conn.execute(text("PRAGMA table_info(fees)"))
+        columns = [row[1] for row in res.fetchall()]
+        if "reg_number" not in columns:
+            conn.execute(text("ALTER TABLE fees ADD COLUMN reg_number VARCHAR"))
             conn.commit()
 
 run_migrations()
@@ -48,6 +64,7 @@ app.add_middleware(
 app.include_router(auth.router,prefix="/auth",tags=["Authentication"])
 app.include_router(student.router,prefix="/student",tags=["Student"])
 app.include_router(admin.router,prefix="/admin",tags=["Admin"])
+app.include_router(chat.router,prefix="/chat",tags=["Chat"])
 @app.get("/")
 def root():
     return {"message":"smart campus-portal is live now..!"}

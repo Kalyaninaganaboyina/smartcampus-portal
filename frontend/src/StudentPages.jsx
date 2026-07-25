@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Navbar from './Navbar'
 import FloatingBar from './FloatingBar'
 import './StudentPages.css'
+import { API_BASE_URL } from './config'
 
 export function Dashboard() {
   const [profile, setProfile] = useState(null)
@@ -26,27 +27,27 @@ export function Dashboard() {
         const headers = { Authorization: `Bearer ${token}` }
 
         // 1. Fetch Profile
-        const profileRes = await fetch('http://localhost:8000/student/profile', { headers })
+        const profileRes = await fetch(`${API_BASE_URL}/student/profile`, { headers })
         if (!profileRes.ok) throw new Error('Failed to load profile details')
         const profileData = await profileRes.json()
         setProfile(profileData)
 
         // 2. Fetch Attendance
-        const attendanceRes = await fetch('http://localhost:8000/student/profile/attendance', { headers })
+        const attendanceRes = await fetch(`${API_BASE_URL}/student/profile/attendance`, { headers })
         if (attendanceRes.ok) {
           const attData = await attendanceRes.json()
           setAttendance(attData.attendance?.[0] || null)
         }
 
         // 3. Fetch Marks
-        const marksRes = await fetch('http://localhost:8000/student/profile/marks', { headers })
+        const marksRes = await fetch(`${API_BASE_URL}/student/profile/marks`, { headers })
         if (marksRes.ok) {
           const marksData = await marksRes.json()
           setMarks(marksData.marks || [])
         }
 
         // 4. Fetch Fees
-        const feesRes = await fetch('http://localhost:8000/student/profile/fees', { headers })
+        const feesRes = await fetch(`${API_BASE_URL}/student/profile/fees`, { headers })
         if (feesRes.ok) {
           const feesData = await feesRes.json()
           setFees(feesData)
@@ -306,13 +307,13 @@ export function Attendance() {
         setLoading(true)
         const headers = { Authorization: `Bearer ${token}` }
 
-        const profileRes = await fetch('http://localhost:8000/student/profile', { headers })
+        const profileRes = await fetch(`${API_BASE_URL}/student/profile`, { headers })
         if (profileRes.ok) {
           const profileData = await profileRes.json()
           setProfile(profileData)
         }
 
-        const attendanceRes = await fetch('http://localhost:8000/student/profile/attendance', { headers })
+        const attendanceRes = await fetch(`${API_BASE_URL}/student/profile/attendance`, { headers })
         if (!attendanceRes.ok) throw new Error('Failed to load student attendance logs')
         const attData = await attendanceRes.json()
         setAttendance(attData.attendance?.[0] || null)
@@ -499,13 +500,13 @@ export function Percentage() {
         setLoading(true)
         const headers = { Authorization: `Bearer ${token}` }
 
-        const profileRes = await fetch('http://localhost:8000/student/profile', { headers })
+        const profileRes = await fetch(`${API_BASE_URL}/student/profile`, { headers })
         if (profileRes.ok) {
           const profileData = await profileRes.json()
           setProfile(profileData)
         }
 
-        const marksRes = await fetch('http://localhost:8000/student/profile/marks', { headers })
+        const marksRes = await fetch(`${API_BASE_URL}/student/profile/marks`, { headers })
         if (!marksRes.ok) throw new Error('Failed to load student academic records')
         const marksData = await marksRes.json()
         setMarks(marksData.marks || [])

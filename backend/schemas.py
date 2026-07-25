@@ -14,6 +14,15 @@ class AdminLogin(BaseModel):
 class TokenResponse(BaseModel):
     access_token:str
     token_type:str
+    is_default_password:bool = False
+    name_set:bool = True
+
+class SetNameRequest(BaseModel):
+    name: str
+    branch: str | None = None
+    course: str | None = None
+    year: int | None = None
+
 class AdminResponse(BaseModel):
     id:int
     name:str
@@ -22,14 +31,15 @@ class AdminResponse(BaseModel):
         from_attributes = True
 class StudentResponse(BaseModel):
     id: int
-    reg_number: str   # ✅ include reg_number in response
-    name: str
+    reg_number: str | None = None
+    roll_number: str | None = None
+    name: str | None = None
     email: EmailStr
-    branch: str
-    year: int
-    course: str
-    phone_no: str
-    address: str
+    branch: str | None = None
+    year: int | None = None
+    course: str | None = None
+    phone_no: str | None = None
+    address: str | None = None
     class Config:
         from_attributes = True
 class MarksCreate(BaseModel):
@@ -61,3 +71,52 @@ class FeeResponse(FeeCreate):
     id: int
     class Config:
         from_attributes = True
+
+class StudentCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    branch: str
+    year: int
+    course: str
+    phone_no: str | None = None
+    address: str | None = None
+
+class StudentUpdate(BaseModel):
+    name: str | None = None
+    email: EmailStr | None = None
+    password: str | None = None
+    branch: str | None = None
+    year: int | None = None
+    course: str | None = None
+    phone_no: str | None = None
+    address: str | None = None
+
+class FacultyCreate(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+    department: str
+    designation: str | None = None
+    phone_no: str | None = None
+    address: str | None = None
+
+class FacultyUpdate(BaseModel):
+    name: str | None = None
+    email: EmailStr | None = None
+    password: str | None = None
+    department: str | None = None
+    designation: str | None = None
+    phone_no: str | None = None
+    address: str | None = None
+
+class FacultyResponse(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    department: str
+    designation: str | None = None
+    phone_no: str | None = None
+    address: str | None = None
+    class Config:
+        from_attributes = True

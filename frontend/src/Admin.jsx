@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import Navbar from './Navbar'
 import FloatingBar from './FloatingBar'
 import './Admin.css'
+import { API_BASE_URL } from './config'
 
 function Admin() {
   const role = localStorage.getItem('role')
@@ -80,7 +81,7 @@ function Admin() {
     if (!token) return
     setIsStudentsLoading(true)
     try {
-      const response = await fetch('http://localhost:8000/admin/students', {
+      const response = await fetch(`${API_BASE_URL}/admin/students`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -103,7 +104,7 @@ function Admin() {
     const token = localStorage.getItem('token');
     if (!token) return;
     try {
-      const response = await fetch('http://localhost:8000/admin/students/all', {
+      const response = await fetch(`${API_BASE_URL}/admin/students/all`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -121,7 +122,7 @@ function Admin() {
     if (!token) return
     setIsFacultyLoading(true)
     try {
-      const response = await fetch('http://localhost:8000/admin/faculty', {
+      const response = await fetch(`${API_BASE_URL}/admin/faculty`, {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -157,7 +158,7 @@ function Admin() {
       return
     }
 
-    const endpoint = `http://localhost:8000/admin/upload-${tab}`
+    const endpoint = `${API_BASE_URL}/admin/upload-${tab}`
     const formData = new FormData()
     formData.append('file', file)
 
@@ -270,8 +271,8 @@ function Admin() {
     if (!token) return
 
     const endpoint = isEditingStudent
-      ? `http://localhost:8000/admin/students/${editingStudentId}`
-      : 'http://localhost:8000/admin/students'
+      ? `${API_BASE_URL}/admin/students/${editingStudentId}`
+      : `${API_BASE_URL}/admin/students`
 
     const method = isEditingStudent ? 'PUT' : 'POST'
 
@@ -312,8 +313,8 @@ function Admin() {
     if (!token) return
 
     const endpoint = isEditingFaculty
-      ? `http://localhost:8000/admin/faculty/${editingFacultyId}`
-      : 'http://localhost:8000/admin/faculty'
+      ? `${API_BASE_URL}/admin/faculty/${editingFacultyId}`
+      : `${API_BASE_URL}/admin/faculty`
 
     const method = isEditingFaculty ? 'PUT' : 'POST'
 
@@ -353,7 +354,7 @@ function Admin() {
     if (!token) return
 
     try {
-      const response = await fetch(`http://localhost:8000/admin/students/${studentId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/students/${studentId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -380,7 +381,7 @@ function Admin() {
     if (!token) return
 
     try {
-      const response = await fetch(`http://localhost:8000/admin/faculty/${facultyId}`, {
+      const response = await fetch(`${API_BASE_URL}/admin/faculty/${facultyId}`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`
@@ -486,7 +487,7 @@ function Admin() {
             <h3>Add Student from Bio PDF</h3>
             <p>
               Upload a student info PDF. The system parses details like <strong>Name, Rollnumber, Email, Branch, Year, Course</strong>.
-              The student will only be able to login with password <strong>Campus@123</strong>, which they can later change.
+              The student will only be able to login with password <strong>123456789</strong>, which they can later change.
             </p>
             <input type="file" accept=".pdf" onChange={handleFileChange} />
             <button type="button" className="admin-form-btn" onClick={() => handleUpload('student-pdf')} disabled={!file || isUploading}>

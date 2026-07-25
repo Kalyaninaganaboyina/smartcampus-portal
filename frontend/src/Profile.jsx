@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from './Navbar'
 import FloatingBar from './FloatingBar'
+import { API_BASE_URL } from './config'
 
 function Profile() {
   const [profile, setProfile] = useState({
+    name: '',
     studentName: 'Student',
     role: 'student',
     email: '',
     branch: '',
     year: '',
-    course: ''
+    course: '',
+    rollNumber: ''
   })
   const [editMode, setEditMode] = useState(false)
   const [passwordMode, setPasswordMode] = useState(false)
   const [feedback, setFeedback] = useState('')
   const [passwordFeedback, setPasswordFeedback] = useState('')
   const [passwords, setPasswords] = useState({ current: '', newPassword: '', confirmPassword: '' })
+  const [quickName, setQuickName] = useState('')
+  const [savingQuickName, setSavingQuickName] = useState(false)
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -23,7 +28,7 @@ function Profile() {
       const token = localStorage.getItem('token')
       if (storedRole === 'student' && token) {
         try {
-          const response = await fetch('http://localhost:8000/student/profile', {
+          const response = await fetch(`${API_BASE_URL}/student/profile`, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -31,13 +36,16 @@ function Profile() {
           if (!response.ok) throw new Error('Failed to load profile')
           const data = await response.json()
           setProfile({
+            name: data.name || '',
             studentName: data.name || data.email || 'Student',
             role: storedRole,
             email: data.email || '',
             branch: data.branch || '',
             year: data.year?.toString() || '',
             course: data.course || '',
+            rollNumber: data.reg_number || data.roll_number || '',
           })
+          if (data.name) setQuickName(data.name)
           return
         } catch (error) {
           console.warn('Student profile fetch failed, falling back to local storage', error)
@@ -45,12 +53,14 @@ function Profile() {
       }
 
       setProfile({
+        name: localStorage.getItem('studentName') || '',
         studentName: localStorage.getItem('studentName') || 'Student',
         role: storedRole,
         email: localStorage.getItem('studentEmail') || '',
         branch: localStorage.getItem('studentBranch') || '',
         year: localStorage.getItem('studentYear') || '',
         course: localStorage.getItem('studentCourse') || '',
+        rollNumber: localStorage.getItem('studentRollNumber') || '',
       })
     }
 
@@ -63,12 +73,14 @@ function Profile() {
   }
 
   const saveProfileToStorage = (profileData) => {
-    localStorage.setItem('studentName', profileData.studentName)
+    const displayName = profileData.name || profileData.studentName || 'Student'
+    localStorage.setItem('studentName', displayName)
     localStorage.setItem('role', profileData.role)
     localStorage.setItem('studentEmail', profileData.email)
     localStorage.setItem('studentBranch', profileData.branch)
     localStorage.setItem('studentYear', profileData.year)
     localStorage.setItem('studentCourse', profileData.course)
+    localStorage.setItem('studentRollNumber', profileData.rollNumber || '')
   }
 
   const handleSave = async (e) => {
@@ -78,13 +90,14 @@ function Profile() {
 
     if (role === 'student' && token) {
       try {
-        const response = await fetch('http://localhost:8000/student/profile', {
+        const response = await fetch(`${API_BASE_URL}/student/profile`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
+            name: profile.name,
             email: profile.email,
             branch: profile.branch,
             year: profile.year ? Number(profile.year) : undefined,
@@ -98,12 +111,14 @@ function Profile() {
         }
 
         const updatedProfile = {
-          studentName: data.name || profile.studentName,
+          name: data.name || profile.name,
+          studentName: data.name || data.email || profile.studentName,
           role,
           email: data.email || profile.email,
           branch: data.branch || profile.branch,
           year: data.year?.toString() || profile.year,
           course: data.course || profile.course,
+          rollNumber: data.reg_number || profile.rollNumber,
         }
         setProfile(updatedProfile)
         saveProfileToStorage(updatedProfile)
@@ -119,6 +134,39 @@ function Profile() {
     saveProfileToStorage(profile)
     setFeedback('Profile updated successfully.')
     setEditMode(false)
+  }
+
+  const handleQuickNameSave = async (e) => {
+    e.preventDefault()
+    const trimmed = quickName.trim()
+    if (!trimmed) return
+    setSavingQuickName(true)
+    const token = localStorage.getItem('token')
+    try {
+      const response = await fetch(`${API_BASE_URL}/student/set-name`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name: trimmed }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.detail || 'Failed to set name')
+      
+      const newName = data.name || trimmed
+      setProfile((prev) => ({
+        ...prev,
+        name: newName,
+        studentName: newName,
+      }))
+      localStorage.setItem('studentName', newName)
+      setFeedback('Student Name saved successfully!')
+    } catch (err) {
+      setFeedback(err.message)
+    } finally {
+      setSavingQuickName(false)
+    }
   }
 
   const handlePasswordChange = async (e) => {
@@ -138,7 +186,7 @@ function Profile() {
     const token = localStorage.getItem('token')
     if (token) {
       try {
-        const response = await fetch('http://localhost:8000/student/change-password', {
+        const response = await fetch(`${API_BASE_URL}/student/change-password`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -157,6 +205,7 @@ function Profile() {
         }
 
         setPasswordFeedback('Password updated successfully.')
+        localStorage.setItem('isDefaultPassword', 'false')
         setPasswords({ current: '', newPassword: '', confirmPassword: '' })
         setTimeout(() => setPasswordMode(false), 1500)
         return
@@ -178,22 +227,23 @@ function Profile() {
     setPasswordMode(false)
   }
 
-  const formField = (label, key, type = 'text', placeholder = '') => (
+  const formField = (label, key, type = 'text', placeholder = '', readOnly = false) => (
     <label style={{ display: 'block', marginBottom: 16 }}>
       <div style={{ marginBottom: 8, color: '#334155', fontWeight: 700 }}>{label}</div>
       <input
         type={type}
-        value={profile[key]}
+        value={(!editMode || readOnly) && !profile[key] ? 'Not Set' : profile[key]}
         placeholder={placeholder}
-        disabled={!editMode}
+        disabled={readOnly || !editMode}
         onChange={(e) => handleChange(key, e.target.value)}
         style={{
           width: '100%',
           padding: '14px 16px',
           borderRadius: 14,
           border: '1px solid #cbd5e1',
-          background: editMode ? '#fff' : '#f8fafc',
-          color: '#0f172a'
+          background: (readOnly || !editMode) ? '#f8fafc' : '#fff',
+          color: (!readOnly && !editMode) && !profile[key] ? '#94a3b8' : '#0f172a',
+          fontStyle: (!readOnly && !editMode) && !profile[key] ? 'italic' : 'normal'
         }}
       />
     </label>
@@ -226,8 +276,52 @@ function Profile() {
               </button>
             </div>
 
+            {!profile.name && (
+              <div style={{
+                marginTop: 20, padding: '18px 22px', borderRadius: 20,
+                background: 'linear-gradient(135deg, #fef3c7, #fffbe6)',
+                border: '1.5px solid #fde68a', display: 'flex', alignItems: 'center',
+                justifyContent: 'space-between', gap: 16, flexWrap: 'wrap'
+              }}>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#92400e', fontSize: '1rem', marginBottom: 4 }}>
+                    ⚠️ Student Name is missing (null)
+                  </div>
+                  <div style={{ color: '#b45309', fontSize: '0.88rem' }}>
+                    Enter your name below and click Save to store it in the backend database.
+                  </div>
+                </div>
+                <form onSubmit={handleQuickNameSave} style={{ display: 'flex', gap: 8, flex: 1, maxWidth: 380 }}>
+                  <input
+                    type="text"
+                    placeholder="Enter Student Name"
+                    value={quickName}
+                    onChange={(e) => setQuickName(e.target.value)}
+                    style={{
+                      flex: 1, padding: '10px 14px', borderRadius: 12, border: '1px solid #fcd34d',
+                      outline: 'none', background: '#fff', fontSize: '0.95rem'
+                    }}
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={savingQuickName}
+                    style={{
+                      padding: '10px 18px', borderRadius: 12, border: 'none',
+                      background: '#d97706', color: '#fff', fontWeight: 600,
+                      cursor: savingQuickName ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap'
+                    }}
+                  >
+                    {savingQuickName ? 'Saving...' : 'Save Name'}
+                  </button>
+                </form>
+              </div>
+            )}
+
             <form onSubmit={handleSave} style={{ marginTop: 28, display: 'grid', gap: 20 }}>
               <div style={{ display: 'grid', gap: 20, gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+                {formField('Roll Number', 'rollNumber', 'text', 'Not Set', true)}
+                {formField('Student Name', 'name', 'text', 'Enter full student name')}
                 {formField('Email', 'email', 'email', 'name@example.com')}
                 {formField('Branch', 'branch', 'text', 'Computer Science')}
                 {formField('Year', 'year', 'number', '2')}
