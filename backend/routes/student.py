@@ -2,8 +2,8 @@ from fastapi import APIRouter,Depends,HTTPException
 from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models import Student,Marks,Attendance,Fee
-from backend.auth import get_current_student
-from backend.schemas import SetNameRequest, StudentUpdate, StudentResponse
+from backend.auth import get_current_student, verify_password, hash_password
+from backend.schemas import SetNameRequest, StudentUpdate, StudentResponse, ChangePasswordRequest
 router=APIRouter()
 
 @router.put("/set-name")
@@ -90,7 +90,7 @@ def get_marks(
         "student":current_student.name,
         "marks":[
             {
-                #"subject":m.subject,
+                "subject":m.subject,
                 "internal":m.internal_marks,
                 "external":m.external_marks,
                 "total":m.internal_marks+m.external_marks
@@ -141,3 +141,22 @@ def get_fees(
         "status":"Paid" if fees.due_fee ==0 else "Pending"
 
     }
+
+@router.put("/change-password")
+def change_password(
+    payload: ChangePasswordRequest,
+    current_student: Student = Depends(get_current_student),
+    db: Session = Depends(get_db)
+):
+    if not verify_password(payload.current_password, current_student.password):
+        raise HTTPException(status_code=400, detail="Incorrect current password")
+    
+    if len(payload.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters long")
+        
+    if payload.new_password != payload.confirm_password:
+        raise HTTPException(status_code=400, detail="New passwords do not match")
+        
+    current_student.password = hash_password(payload.new_password)
+    db.commit()
+    return {"message": "Password changed successfully"}

@@ -285,10 +285,22 @@ def upload_student_pdf(file: UploadFile = File(...), db: Session = Depends(get_d
                         year = int(tokens[-2])
                         course = tokens[-1]
                         branch = tokens[-3]
-                        email = tokens[1]
+                        
+                        # Find the email token (token containing '@')
+                        email = next((t for t in tokens if "@" in t), None)
+                        if not email:
+                            continue
+                        
                         # Derive roll_number from email (first 10 chars, uppercase)
                         roll_number = email.split('@')[0][:10].upper()
-                        name = " ".join(tokens[2:-3]) if len(tokens) > 5 else None
+                        
+                        # Determine name from tokens between index 2 and branch (index -3).
+                        # If no name is provided, use the email prefix as a default.
+                        name_tokens = tokens[2:-3]
+                        if name_tokens:
+                            name = " ".join(name_tokens)
+                        else:
+                            name = email.split('@')[0].upper()
                         
                         existing = db.query(models.Student).filter(models.Student.email == email).first()
                         if existing:
@@ -319,6 +331,7 @@ def upload_student_pdf(file: UploadFile = File(...), db: Session = Depends(get_d
                         
                         students_added += 1
                     except Exception as e:
+                        db.rollback()
                         print(f"Skipping line error: {e}")
                         continue
         return {"message": f"Successfully parsed PDF and added {students_added} students"}

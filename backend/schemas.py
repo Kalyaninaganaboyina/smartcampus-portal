@@ -119,4 +119,10 @@ class FacultyResponse(BaseModel):
     phone_no: str | None = None
     address: str | None = None
     class Config:
-        from_attributes = True
+        from_attributes = True
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+    confirm_password: str
+
