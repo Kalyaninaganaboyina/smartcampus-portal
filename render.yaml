@@ -13,7 +13,8 @@ services:
         generateValue: true
 
   # 2. React Frontend (Static Site)
-  - type: static
+  - type: web
+    runtime: static
     name: smartcampus-frontend
     rootDir: frontend
     buildCommand: npm install && npm run build
