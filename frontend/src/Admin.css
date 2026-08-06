@@ -335,3 +335,348 @@
   background: #ffd6d6;
 }
 
+/* ── Analytics Dashboard Styles ────────────────────── */
+
+.analytics-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.analytics-card-item {
+  background: linear-gradient(135deg, #ffffff 0%, #f7faff 100%);
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(28, 50, 93, 0.05);
+  border: 1px solid rgba(220, 228, 241, 0.5);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.analytics-card-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(28, 50, 93, 0.1);
+}
+
+.analytics-card-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #1f4bb8, #7c6af7);
+}
+
+.analytics-card-item.danger::before {
+  background: linear-gradient(90deg, #d32f2f, #ff6b6b);
+}
+
+.analytics-card-item.success::before {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.analytics-card-label {
+  font-size: 0.85rem;
+  color: #5f6f8d;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.analytics-card-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #102a5f;
+  line-height: 1;
+}
+
+.analytics-card-sub {
+  font-size: 0.8rem;
+  color: #8fa0be;
+  margin-top: 0.5rem;
+}
+
+.analytics-visualizer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 990px) {
+  .analytics-visualizer-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.analytics-section-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 1.75rem;
+  box-shadow: 0 12px 36px rgba(28, 50, 93, 0.06);
+  border: 1px solid #e2eaf5;
+  display: flex;
+  flex-direction: column;
+}
+
+.analytics-section-title {
+  color: #102a5f;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.analytics-section-desc {
+  color: #7b8ca8;
+  font-size: 0.9rem;
+  margin: 0 0 1.5rem 0;
+}
+
+/* Donut Chart Styling */
+.chart-container-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin: 1.5rem 0;
+}
+
+.donut-inner-text {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.donut-pct {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #102a5f;
+}
+
+.donut-lbl {
+  font-size: 0.75rem;
+  color: #7b8ca8;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+/* Custom SVG Bar Chart */
+.svg-bar-chart-container {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 200px;
+  padding-bottom: 25px;
+  border-bottom: 1px solid #e4ecf7;
+  margin: 1.5rem 0;
+}
+
+.bar-item-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1;
+  max-width: 50px;
+  position: relative;
+}
+
+.bar-graphic {
+  width: 32px;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #7c6af7 0%, #1f4bb8 100%);
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.bar-graphic:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 5px 15px rgba(124, 106, 247, 0.4);
+}
+
+.bar-tooltip {
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: 8px;
+  background: #102a5f;
+  color: #ffffff;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.bar-item-col:hover .bar-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-3px);
+}
+
+.bar-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #4e5e7c;
+  margin-top: 8px;
+}
+
+/* Legend items */
+.chart-legend-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.25rem;
+  margin-top: 1rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #5f6f8d;
+  font-weight: 600;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.badge-warning-custom {
+  background: #fff8eb;
+  color: #b25e00;
+  border: 1px solid #ffe8cc;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-danger-custom {
+  background: #ffebeb;
+  color: #c53030;
+  border: 1px solid #fed7d7;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.badge-success-custom {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* Top ranking list styles */
+.ranking-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ranking-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: #f8fbff;
+  border-radius: 12px;
+  border: 1px solid #eef3fb;
+}
+
+.ranking-item-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ranking-badge-num {
+  width: 24px;
+  height: 24px;
+  background: #1f4bb8;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ranking-item-row:nth-child(1) .ranking-badge-num {
+  background: #d4af37; /* Gold */
+}
+.ranking-item-row:nth-child(2) .ranking-badge-num {
+  background: #c0c0c0; /* Silver */
+}
+.ranking-item-row:nth-child(3) .ranking-badge-num {
+  background: #cd7f32; /* Bronze */
+}
+
+.ranking-item-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.ranking-item-name {
+  font-weight: 700;
+  color: #102a5f;
+  font-size: 0.95rem;
+}
+
+.ranking-item-roll {
+  font-size: 0.75rem;
+  color: #7b8ca8;
+}
+
+.ranking-item-score {
+  font-weight: 800;
+  color: #1f4bb8;
+  font-size: 1.05rem;
+}
+
+/* Progress indicator bars */
+.financials-progress-track {
+  width: 100%;
+  height: 12px;
+  background: #eef3fa;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  margin: 1rem 0;
+}
+
+.financials-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.financials-progress-due {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+

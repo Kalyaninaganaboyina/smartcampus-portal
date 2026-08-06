@@ -338,3 +338,177 @@ def upload_student_pdf(file: UploadFile = File(...), db: Session = Depends(get_d
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to parse PDF: {str(e)}")
 
+
+@router.get("/analytics")
+def get_analytics(db: Session = Depends(get_db), current_admin: models.Admin = Depends(get_current_admin)):
+    """Fetch academic, attendance, and fee analytics across all students."""
+    # 1. Total counts
+    students = db.query(models.Student).all()
+    total_students = len(students)
+    faculty_count = db.query(models.Faculty).count()
+    
+    student_map = {s.id: s for s in students}
+    
+    # 2. Attendance Stats
+    attendance_records = db.query(models.Attendance).all()
+    total_attendance_percentage = 0.0
+    valid_att_count = 0
+    safe_count = 0
+    risk_count = 0
+    students_at_risk = []
+    students_with_att = set()
+    
+    for att in attendance_records:
+        if att.total_days and att.total_days > 0:
+            percentage = round((att.attended_days / att.total_days) * 100, 2)
+            total_attendance_percentage += percentage
+            valid_att_count += 1
+            students_with_att.add(att.student_id)
+            
+            student = student_map.get(att.student_id)
+            student_name = student.name if student else "N/A"
+            student_roll = student.reg_number if student else "N/A"
+            student_email = student.email if student else "N/A"
+            
+            if percentage >= 75:
+                safe_count += 1
+            else:
+                risk_count += 1
+                students_at_risk.append({
+                    "id": att.student_id,
+                    "roll_number": student_roll,
+                    "name": student_name,
+                    "email": student_email,
+                    "percentage": percentage,
+                    "attended_days": att.attended_days,
+                    "total_days": att.total_days
+                })
+                
+    # Students who have no attendance record are considered "At Risk" (0%)
+    for s_id, s in student_map.items():
+        if s_id not in students_with_att:
+            risk_count += 1
+            students_at_risk.append({
+                "id": s.id,
+                "roll_number": s.reg_number,
+                "name": s.name,
+                "email": s.email,
+                "percentage": 0.0,
+                "attended_days": 0,
+                "total_days": 0
+            })
+            
+    average_attendance = round(total_attendance_percentage / valid_att_count, 2) if valid_att_count > 0 else 0.0
+    
+    # 3. Academic Stats
+    marks_records = db.query(models.Marks).all()
+    student_marks_map = {}
+    for m in marks_records:
+        if m.student_id not in student_marks_map:
+            student_marks_map[m.student_id] = []
+        student_marks_map[m.student_id].append(m)
+        
+    grade_distribution = {"O": 0, "S": 0, "A": 0, "B": 0, "C": 0, "D": 0, "F": 0}
+    top_performers = []
+    total_gpas = 0.0
+    students_with_gpa = 0
+    
+    def get_grade_letter(pct):
+        if pct >= 90: return 'O'
+        if pct >= 80: return 'S'
+        if pct >= 70: return 'A'
+        if pct >= 60: return 'B'
+        if pct >= 50: return 'C'
+        if pct >= 40: return 'D'
+        return 'F'
+        
+    for s_id, s in student_map.items():
+        s_marks = student_marks_map.get(s_id, [])
+        if s_marks:
+            total_earned = 0
+            total_max = 0
+            for m in s_marks:
+                total_earned += (m.internal_marks or 0.0) + (m.external_marks or 0.0)
+                is_high_max = ((m.internal_marks or 0.0) + (m.external_marks or 0.0)) > 100
+                total_max += 150 if is_high_max else 100
+                
+            avg_pct = round((total_earned / total_max) * 100, 2) if total_max > 0 else 0.0
+            gpa = round(avg_pct / 10.0, 2)
+            
+            overall_grade = get_grade_letter(avg_pct)
+            grade_distribution[overall_grade] += 1
+            
+            total_gpas += gpa
+            students_with_gpa += 1
+            
+            top_performers.append({
+                "id": s_id,
+                "name": s.name,
+                "roll_number": s.reg_number,
+                "gpa": gpa,
+                "percentage": avg_pct
+            })
+        else:
+            grade_distribution["F"] += 1
+            
+    average_gpa = round(total_gpas / students_with_gpa, 2) if students_with_gpa > 0 else 0.0
+    top_performers = sorted(top_performers, key=lambda x: x["gpa"], reverse=True)[:5]
+    
+    # 4. Fee Stats
+    fees_records = db.query(models.Fee).all()
+    total_fees = 0.0
+    total_paid = 0.0
+    total_due = 0.0
+    students_with_dues = []
+    student_fee_map = {f.student_id: f for f in fees_records}
+    
+    for s_id, s in student_map.items():
+        fee = student_fee_map.get(s_id)
+        if fee:
+            t_fee = fee.total_fee or 0.0
+            p_fee = fee.paid_fee or 0.0
+            d_fee = fee.due_fee or 0.0
+            
+            total_fees += t_fee
+            total_paid += p_fee
+            total_due += d_fee
+            
+            if d_fee > 0:
+                students_with_dues.append({
+                    "id": s_id,
+                    "name": s.name,
+                    "roll_number": s.reg_number,
+                    "email": s.email,
+                    "total_fee": t_fee,
+                    "paid_fee": p_fee,
+                    "due_fee": d_fee
+                })
+        else:
+            # Defaults if no fee record exists
+            pass
+            
+    students_with_dues = sorted(students_with_dues, key=lambda x: x["due_fee"], reverse=True)
+    
+    return {
+        "total_students": total_students,
+        "total_faculty": faculty_count,
+        "attendance_stats": {
+            "average_attendance": average_attendance,
+            "safe_count": safe_count,
+            "risk_count": risk_count,
+            "students_at_risk": students_at_risk
+        },
+        "academic_stats": {
+            "average_gpa": average_gpa,
+            "grade_distribution": grade_distribution,
+            "top_performers": top_performers
+        },
+        "fee_stats": {
+            "total_fees": total_fees,
+            "total_paid": total_paid,
+            "total_due": total_due,
+            "students_with_dues": students_with_dues
+        }
+    }
+
+

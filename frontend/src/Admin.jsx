@@ -13,6 +13,11 @@ function Admin() {
   const [message, setMessage] = useState('')
   const [isUploading, setIsUploading] = useState(false)
 
+  // Analytics state
+  const [analyticsData, setAnalyticsData] = useState(null)
+  const [isAnalyticsLoading, setIsAnalyticsLoading] = useState(false)
+  const [analyticsError, setAnalyticsError] = useState('')
+
   // Registered students list state
   const [students, setStudents] = useState([])
   const [isStudentsLoading, setIsStudentsLoading] = useState(false)
@@ -136,6 +141,33 @@ function Admin() {
       console.error("Error fetching faculty list", e)
     } finally {
       setIsFacultyLoading(false)
+    }
+  }
+
+  const fetchAnalytics = async () => {
+    const token = localStorage.getItem('token')
+    if (!token) return
+    setIsAnalyticsLoading(true)
+    setAnalyticsError('')
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/analytics`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      if (handleAuthError(response)) return
+      if (response.ok) {
+        const data = await response.json()
+        setAnalyticsData(data)
+      } else {
+        const data = await response.json().catch(() => null)
+        throw new Error(data?.detail || 'Failed to fetch analytics statistics')
+      }
+    } catch (e) {
+      console.error("Error fetching analytics stats", e)
+      setAnalyticsError(e.message || 'Error connecting to analytics endpoint')
+    } finally {
+      setIsAnalyticsLoading(false)
     }
   }
 
@@ -427,12 +459,13 @@ function Admin() {
               Manage student registrations, upload marks, attendance reports, and academic status from one place.
             </p>
             <div className="admin-actions">
-              <button className={`admin-btn ${activeTab === 'marks' ? 'active' : ''}`} type="button" onClick={() => setActiveTab('marks')}>Upload Marks</button>
-              <button className={`admin-btn ${activeTab === 'attendance' ? 'active' : ''}`} type="button" onClick={() => setActiveTab('attendance')}>Upload Attendance</button>
-              <button className={`admin-btn ${activeTab === 'fees' ? 'active' : ''}`} type="button" onClick={() => setActiveTab('fees')}>Upload Fees</button>
-              <button className={`admin-btn ${activeTab === 'student-pdf' ? 'active' : ''}`} type="button" onClick={() => setActiveTab('student-pdf')}>Add Student (PDF)</button>
-              <button className={`admin-btn ${activeTab === 'students' ? 'active' : ''}`} type="button" onClick={() => { setActiveTab('students'); fetchStudents(); }}>Manage Students</button>
-              <button className={`admin-btn ${activeTab === 'faculty' ? 'active' : ''}`} type="button" onClick={() => { setActiveTab('faculty'); fetchFaculty(); }}>Manage Faculty</button>
+              <button className={`admin-btn ${activeTab === 'marks' ? 'active' : ''}`} type="button" onClick={() => { setActiveTab('marks'); setMessage(''); }}>Upload Marks</button>
+              <button className={`admin-btn ${activeTab === 'attendance' ? 'active' : ''}`} type="button" onClick={() => { setActiveTab('attendance'); setMessage(''); }}>Upload Attendance</button>
+              <button className={`admin-btn ${activeTab === 'fees' ? 'active' : ''}`} type="button" onClick={() => { setActiveTab('fees'); setMessage(''); }}>Upload Fees</button>
+              <button className={`admin-btn ${activeTab === 'student-pdf' ? 'active' : ''}`} type="button" onClick={() => { setActiveTab('student-pdf'); setMessage(''); }}>Add Student (PDF)</button>
+              <button className={`admin-btn ${activeTab === 'students' ? 'active' : ''}`} type="button" onClick={() => { setActiveTab('students'); fetchStudents(); setMessage(''); }}>Manage Students</button>
+              <button className={`admin-btn ${activeTab === 'faculty' ? 'active' : ''}`} type="button" onClick={() => { setActiveTab('faculty'); fetchFaculty(); setMessage(''); }}>Manage Faculty</button>
+              <button className={`admin-btn ${activeTab === 'analytics' ? 'active' : ''}`} type="button" onClick={() => { setActiveTab('analytics'); fetchAnalytics(); setMessage(''); }}>Track & Analyze</button>
             </div>
           </div>
 
@@ -444,12 +477,12 @@ function Admin() {
               <div className="admin-status">
                 <div className="admin-status-label">Active Option</div>
                 <div className="admin-status-value">
-                  {activeTab === 'student-pdf' ? 'Add Student (PDF)' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+                  {activeTab === 'student-pdf' ? 'Add Student (PDF)' : activeTab === 'analytics' ? 'Track & Analyze' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
                 </div>
               </div>
 
               <div className="admin-panel-note">
-                Ensure files match target format. PDF details will be parsed intelligently.
+                {activeTab === 'analytics' ? 'View and analyze real-time student grades, attendance, and fee collections.' : 'Ensure files match target format. PDF details will be parsed intelligently.'}
               </div>
             </div>
           </aside>
@@ -694,8 +727,303 @@ function Admin() {
           </section>
         )}
 
-        {/* Registered Students Summary List (only shown when not on student/faculty tabs) */}
-        {activeTab !== 'students' && activeTab !== 'faculty' && (
+        {/* Track & Analyze Analytics */}
+        {activeTab === 'analytics' && (
+          <section className="admin-analytics-section" style={{ marginTop: '2.5rem' }}>
+            {isAnalyticsLoading ? (
+              <div className="admin-form-card" style={{ textAlign: 'center', padding: '3rem' }}>
+                <p style={{ color: '#5f6f8d', fontSize: '1.1rem' }}>Loading campus analytics reports...</p>
+              </div>
+            ) : analyticsError ? (
+              <div className="admin-form-card" style={{ background: '#ffebeb', border: '1px solid #fed7d7' }}>
+                <h3 style={{ color: '#c53030', margin: 0 }}>Error Loading Analytics</h3>
+                <p style={{ color: '#9b2c2c', margin: '0.5rem 0 1rem' }}>{analyticsError}</p>
+                <button type="button" className="admin-form-btn" onClick={fetchAnalytics}>Retry Fetch</button>
+              </div>
+            ) : analyticsData ? (
+              <>
+                {/* 1. Metrics Grid */}
+                <div className="analytics-metrics-grid">
+                  <div className="analytics-card-item">
+                    <div className="analytics-card-label">Total Students</div>
+                    <div className="analytics-card-value">{analyticsData.total_students}</div>
+                    <div className="analytics-card-sub">Registered in portal</div>
+                  </div>
+
+                  <div className="analytics-card-item">
+                    <div className="analytics-card-label">Total Faculty</div>
+                    <div className="analytics-card-value">{analyticsData.total_faculty}</div>
+                    <div className="analytics-card-sub">Teaching staff members</div>
+                  </div>
+
+                  <div className="analytics-card-item success">
+                    <div className="analytics-card-label">Class Attendance</div>
+                    <div className="analytics-card-value">{analyticsData.attendance_stats?.average_attendance}%</div>
+                    <div className="analytics-card-sub">Overall daily average</div>
+                  </div>
+
+                  <div className="analytics-card-item">
+                    <div className="analytics-card-label">Average GPA</div>
+                    <div className="analytics-card-value">{analyticsData.academic_stats?.average_gpa} GPA</div>
+                    <div className="analytics-card-sub">Out of 10.0 scale</div>
+                  </div>
+
+                  <div className="analytics-card-item danger">
+                    <div className="analytics-card-label">Outstanding Dues</div>
+                    <div className="analytics-card-value">₹{analyticsData.fee_stats?.total_due?.toLocaleString('en-IN')}</div>
+                    <div className="analytics-card-sub">Total unpaid balances</div>
+                  </div>
+                </div>
+
+                {/* 2. Visualizers Grid */}
+                <div className="analytics-visualizer-grid">
+                  {/* Left Column: Attendance and Dues */}
+                  <div className="analytics-section-card">
+                    <h3 className="analytics-section-title">
+                      <span>📈</span> Attendance Distribution
+                    </h3>
+                    <p className="analytics-section-desc">Comparison of students meeting 75% attendance vs. those at risk</p>
+                    
+                    {/* SVG Donut Chart */}
+                    {(() => {
+                      const safeVal = analyticsData.attendance_stats?.safe_count || 0;
+                      const riskVal = analyticsData.attendance_stats?.risk_count || 0;
+                      const totalVal = safeVal + riskVal;
+                      const safePct = totalVal > 0 ? Math.round((safeVal / totalVal) * 100) : 0;
+
+                      // SVG parameters: radius = 50, circumference = 314.16
+                      const radius = 50;
+                      const circ = 2 * Math.PI * radius;
+                      const safeOffset = circ - (safePct / 100) * circ;
+
+                      return (
+                        <>
+                          <div className="chart-container-center">
+                            <svg width="140" height="140" viewBox="0 0 140 140">
+                              <circle cx="70" cy="70" r={radius} fill="transparent" stroke="#eef3fa" strokeWidth="16" />
+                              <circle 
+                                cx="70" 
+                                cy="70" 
+                                r={radius} 
+                                fill="transparent" 
+                                stroke="#10b981" 
+                                strokeWidth="16" 
+                                strokeDasharray={circ}
+                                strokeDashoffset={safeOffset}
+                                strokeLinecap="round"
+                                transform="rotate(-90 70 70)"
+                              />
+                            </svg>
+                            <div className="donut-inner-text">
+                              <span className="donut-pct">{safePct}%</span>
+                              <span className="donut-lbl">Eligible</span>
+                            </div>
+                          </div>
+
+                          <div className="chart-legend-grid">
+                            <div className="legend-item">
+                              <span className="legend-dot" style={{ backgroundColor: '#10b981' }}></span>
+                              <span>Safe (≥75%): {safeVal}</span>
+                            </div>
+                            <div className="legend-item">
+                              <span className="legend-dot" style={{ backgroundColor: '#eef3fa', border: '1px solid #dcdfe6' }}></span>
+                              <span>At Risk (&lt;75%): {riskVal}</span>
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
+
+                    {/* Attendance Risk warning list */}
+                    <div style={{ marginTop: '2rem' }}>
+                      <h4 style={{ color: '#102a5f', marginBottom: '0.75rem', fontSize: '0.95rem' }}>Detained / At-Risk Attendance Logs ({analyticsData.attendance_stats?.students_at_risk?.length})</h4>
+                      <div className="admin-table-container" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        <table className="admin-table" style={{ minWidth: '100%' }}>
+                          <thead>
+                            <tr style={{ background: '#f8fafe' }}>
+                              <th style={{ padding: '0.5rem', fontSize: '0.75rem' }}>Roll No</th>
+                              <th style={{ padding: '0.5rem', fontSize: '0.75rem' }}>Name</th>
+                              <th style={{ padding: '0.5rem', fontSize: '0.75rem' }}>Presence</th>
+                              <th style={{ padding: '0.5rem', fontSize: '0.75rem' }}>Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {analyticsData.attendance_stats?.students_at_risk?.length === 0 ? (
+                              <tr>
+                                <td colSpan="4" style={{ textAlign: 'center', padding: '1rem', color: '#8fa0be' }}>All students have attendance cleared!</td>
+                              </tr>
+                            ) : (
+                              analyticsData.attendance_stats?.students_at_risk?.map((student, idx) => (
+                                <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                  <td style={{ padding: '0.5rem', fontSize: '0.85rem', fontWeight: 600 }}>{student.roll_number || 'N/A'}</td>
+                                  <td style={{ padding: '0.5rem', fontSize: '0.85rem' }}>{student.name}</td>
+                                  <td style={{ padding: '0.5rem', fontSize: '0.85rem', fontWeight: 700, color: '#ef4444' }}>{student.percentage}%</td>
+                                  <td style={{ padding: '0.5rem' }}>
+                                    <span className="badge-danger-custom">Detained</span>
+                                  </td>
+                                </tr>
+                              ))
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Grades and Performance */}
+                  <div className="analytics-section-card">
+                    <h3 className="analytics-section-title">
+                      <span>🎓</span> Academic Grade Distributions
+                    </h3>
+                    <p className="analytics-section-desc">Breakdown of student academic categories based on GPA results</p>
+
+                    {/* SVG/CSS Bar Chart for Grades */}
+                    {(() => {
+                      const dist = analyticsData.academic_stats?.grade_distribution || {};
+                      const maxCount = Math.max(...Object.values(dist), 1);
+                      const grades = ['O', 'S', 'A', 'B', 'C', 'D', 'F'];
+                      
+                      return (
+                        <div className="svg-bar-chart-container">
+                          {grades.map((grade) => {
+                            const val = dist[grade] || 0;
+                            // Calculate height percentage (max height = 150px)
+                            const heightPct = Math.max((val / maxCount) * 150, 8); // Minimum 8px for visibility if >0
+
+                            return (
+                              <div className="bar-item-col" key={grade}>
+                                <div className="bar-tooltip">
+                                  {val} Student{val !== 1 ? 's' : ''}
+                                </div>
+                                <div 
+                                  className="bar-graphic" 
+                                  style={{ 
+                                    height: `${heightPct}px`,
+                                    background: grade === 'F' 
+                                      ? 'linear-gradient(180deg, #f87171 0%, #ef4444 100%)' 
+                                      : 'linear-gradient(180deg, #7c6af7 0%, #1f4bb8 100%)'
+                                  }} 
+                                />
+                                <span className="bar-label">{grade}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    })()}
+
+                    {/* Top Performers rankings */}
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <h4 style={{ color: '#102a5f', marginBottom: '0.75rem', fontSize: '0.95rem' }}>Class Top Performers Leaderboard</h4>
+                      <div className="ranking-list-container">
+                        {analyticsData.academic_stats?.top_performers?.length === 0 ? (
+                          <p style={{ color: '#8fa0be', fontSize: '0.85rem', textAlign: 'center', padding: '1rem' }}>No academic logs uploaded yet.</p>
+                        ) : (
+                          analyticsData.academic_stats?.top_performers?.map((student, idx) => (
+                            <div className="ranking-item-row" key={idx}>
+                              <div className="ranking-item-left">
+                                <span className="ranking-badge-num">{idx + 1}</span>
+                                <div className="ranking-item-info">
+                                  <span className="ranking-item-name">{student.name}</span>
+                                  <span className="ranking-item-roll">{student.roll_number || 'N/A'}</span>
+                                </div>
+                              </div>
+                              <span className="ranking-item-score">{student.gpa} GPA</span>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Financial/Fee Dues Section */}
+                <div className="admin-form-card" style={{ marginBottom: '2.5rem' }}>
+                  <h3 className="analytics-section-title">
+                    <span>💸</span> Outstanding Tuition Fees Tracker
+                  </h3>
+                  <p className="analytics-section-desc">Track unpaid academic registration balances and student invoices</p>
+
+                  {(() => {
+                    const totalFees = analyticsData.fee_stats?.total_fees || 0;
+                    const totalPaid = analyticsData.fee_stats?.total_paid || 0;
+                    const totalDue = analyticsData.fee_stats?.total_due || 0;
+                    
+                    const paidPct = totalFees > 0 ? (totalPaid / totalFees) * 100 : 0;
+                    const duePct = totalFees > 0 ? (totalDue / totalFees) * 100 : 0;
+
+                    return (
+                      <div style={{ margin: '1.5rem 0' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#5f6f8d', fontWeight: 600 }}>
+                          <span>Fees Received: ₹{totalPaid.toLocaleString('en-IN')} ({Math.round(paidPct)}%)</span>
+                          <span>Unpaid Balances: ₹{totalDue.toLocaleString('en-IN')} ({Math.round(duePct)}%)</span>
+                        </div>
+                        <div className="financials-progress-track">
+                          <div className="financials-progress-fill" style={{ width: `${paidPct}%` }} />
+                          <div className="financials-progress-due" style={{ width: `${duePct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Dues table list */}
+                  <h4 style={{ color: '#102a5f', marginBottom: '0.75rem', fontSize: '0.95rem' }}>Students with Unpaid Dues ({analyticsData.fee_stats?.students_with_dues?.length})</h4>
+                  <div className="admin-table-container">
+                    <table className="admin-table">
+                      <thead className="admin-table-header">
+                        <tr>
+                          <th>Roll Number</th>
+                          <th>Name</th>
+                          <th>Email Address</th>
+                          <th>Total Billed</th>
+                          <th>Paid Amount</th>
+                          <th>Remaining Due</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analyticsData.fee_stats?.students_with_dues?.length === 0 ? (
+                          <tr>
+                            <td colSpan="7" style={{ textAlign: 'center', color: '#8fa0be', padding: '1.5rem' }}>Outstanding balances cleared for all students!</td>
+                          </tr>
+                        ) : (
+                          analyticsData.fee_stats?.students_with_dues?.map((student, idx) => (
+                            <tr key={idx} className="admin-table-row">
+                              <td className="admin-table-cell-roll">{student.roll_number || 'N/A'}</td>
+                              <td className="admin-table-cell">{student.name}</td>
+                              <td className="admin-table-cell">{student.email}</td>
+                              <td className="admin-table-cell">₹{student.total_fee.toLocaleString('en-IN')}</td>
+                              <td className="admin-table-cell" style={{ color: '#10b981', fontWeight: 600 }}>₹{student.paid_fee.toLocaleString('en-IN')}</td>
+                              <td className="admin-table-cell" style={{ color: '#ef4444', fontWeight: 800 }}>₹{student.due_fee.toLocaleString('en-IN')}</td>
+                              <td className="admin-table-cell">
+                                <a 
+                                  href={`mailto:${student.email}?subject=Urgent: Outstanding Tuition Fee Dues Notice&body=Dear ${student.name},%0D%0A%0D%0AThis is to notify you that your Smart Campus portal shows an outstanding fee balance of INR ${student.due_fee.toLocaleString('en-IN')} out of your total billed amount of INR ${student.total_fee.toLocaleString('en-IN')}.%0D%0A%0D%0APlease clear your dues at the earliest convenience.%0D%0A%0D%0ABest regards,%0D%0AAdministration Office`}
+                                  className="admin-form-btn" 
+                                  style={{ 
+                                    padding: '0.4rem 0.8rem', 
+                                    fontSize: '0.8rem', 
+                                    textDecoration: 'none',
+                                    backgroundColor: '#d32f2f',
+                                    borderRadius: '8px'
+                                  }}
+                                >
+                                  📧 Send Notice
+                                </a>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            ) : null}
+          </section>
+        )}
+
+        {/* Registered Students Summary List */}
+        {activeTab !== 'students' && activeTab !== 'faculty' && activeTab !== 'analytics' && (
           <section className="admin-students-section" style={{ marginTop: '2.5rem' }}>
             <div className="admin-form-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
