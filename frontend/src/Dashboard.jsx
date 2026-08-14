@@ -1,3 +1,3 @@
-import { Dashboard as StudentDashboard } from './StudentPages'
+import StudentPortal from './StudentPortal'
 
-export default StudentDashboard
+export default StudentPortal
