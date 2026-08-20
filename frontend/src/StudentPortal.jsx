@@ -103,7 +103,28 @@ export default function StudentPortal() {
     <div className="student-portal-wrapper">
       {/* Header */}
       <header className="portal-header">
-        <div className="header-brand">
+        <div className="header-brand" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <button
+            onClick={() => activeTab !== 'dashboard' ? setActiveTab('dashboard') : window.history.back()}
+            className="portal-back-btn"
+            title="Go Back"
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.18)',
+              color: '#fff',
+              padding: '6px 14px',
+              borderRadius: '99px',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            ← Back
+          </button>
           <div className="brand-crest">🎓</div>
           <div className="brand-titles">
             <span className="brand-name-main">AMRITASAI</span>
@@ -120,15 +141,39 @@ export default function StudentPortal() {
             <span className="notification-badge">3</span>
           </button>
 
-          <div className="user-profile-capsule">
+          <div
+            className="user-profile-capsule"
+            onClick={() => setActiveTab('profile')}
+            style={{ cursor: 'pointer' }}
+            title="Click student name or icon to view profile"
+          >
             <div className="user-avatar-circle">
               {studentName.charAt(0).toUpperCase()}
             </div>
-            <div className="user-meta">
-              <span className="user-name-text">{studentName}</span>
+            <div
+              className="user-meta"
+              onClick={(e) => {
+                e.stopPropagation()
+                setActiveTab('profile')
+              }}
+              style={{ cursor: 'pointer' }}
+            >
+              <span
+                className="user-name-text"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setActiveTab('profile')
+                }}
+                style={{ cursor: 'pointer', textDecoration: 'underline decoration-transparent', transition: 'all 0.2s' }}
+                title="Click to open Profile"
+              >
+                {studentName}
+              </span>
               <span className="user-reg-text">Reg No: {regNo}</span>
             </div>
           </div>
+
+
 
           <button onClick={handleLogout} className="logout-header-btn">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

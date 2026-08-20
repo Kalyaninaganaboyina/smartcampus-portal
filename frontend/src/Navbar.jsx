@@ -148,7 +148,29 @@ function Navbar({ role = 'student', onDashboardClick, onProfileClick, studentNam
         </div>
       )}
       <nav className="app-nav" style={{ top: showBanner ? '64px' : '16px', transition: 'top 0.3s ease' }}>
-        <div className="nav-left">
+        <div className="nav-left" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button
+            onClick={() => window.history.back()}
+            className="nav-back-btn"
+            title="Go Back"
+            style={{
+              background: 'rgba(255,255,255,0.08)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              color: '#fff',
+              padding: '6px 14px',
+              borderRadius: '99px',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            ← Back
+          </button>
+
           <button
             onClick={toggleMenu}
             className="nav-icon-btn"
@@ -194,24 +216,22 @@ function Navbar({ role = 'student', onDashboardClick, onProfileClick, studentNam
 
           <div className="nav-profile-wrapper">
             <button
-              onClick={toggleProfileMenu}
+              onClick={() => handleProfileAction('profile')}
               className="nav-profile-button"
-              aria-label="Open profile menu"
-              aria-expanded={isProfileMenuOpen}
+              aria-label="Open profile page"
+              title="Click to view Profile"
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
             >
               <div className="profile-avatar">
                 <span>{studentName.charAt(0).toUpperCase()}</span>
               </div>
+              <span className="nav-student-name" style={{ fontWeight: 700, fontSize: '0.88rem', color: '#fff' }}>
+                {studentName}
+              </span>
             </button>
-
-            {isProfileMenuOpen && (
-              <div className="profile-menu">
-                <button onClick={() => handleProfileAction('profile')}>Profile</button>
-                <button onClick={() => handleProfileAction('logout')}>Logout</button>
-              </div>
-            )}
           </div>
         </div>
+
       </nav>
     </>
   )

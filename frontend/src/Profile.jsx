@@ -256,10 +256,34 @@ function Profile() {
         <div style={{ maxWidth: 980, margin: '0 auto', display: 'grid', gap: 24 }}>
           <section style={{ background: '#fff', borderRadius: 28, padding: 28, boxShadow: '0 20px 60px rgba(15,23,42,0.08)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-              <div>
-                <h1 style={{ margin: 0, fontSize: '2rem', color: '#0f172a' }}>Profile</h1>
-                <p style={{ margin: '10px 0 0', color: '#64748b' }}>Edit your contact details and update your password here.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                <button
+                  type="button"
+                  onClick={() => window.history.back()}
+                  style={{
+                    background: '#f1f5f9',
+                    border: '1px solid #cbd5e1',
+                    color: '#0f172a',
+                    padding: '8px 16px',
+                    borderRadius: '99px',
+                    fontWeight: 700,
+                    fontSize: '0.9rem',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    transition: 'all 0.2s ease'
+                  }}
+                  title="Go Back"
+                >
+                  ← Back
+                </button>
+                <div>
+                  <h1 style={{ margin: 0, fontSize: '2rem', color: '#0f172a' }}>Profile</h1>
+                  <p style={{ margin: '6px 0 0', color: '#64748b' }}>Edit your contact details and update your password here.</p>
+                </div>
               </div>
+
               <button
                 type="button"
                 onClick={() => { setEditMode((prev) => !prev); setFeedback('') }}

@@ -396,13 +396,33 @@ export function Attendance() {
         {/* Welcome Section */}
         <section className="student-hero" style={{ minHeight: 'auto', marginBottom: 32 }}>
           <div className="student-copy">
-            <div className="student-badge">Attendance Report</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <button
+                type="button"
+                onClick={() => window.history.back()}
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  color: '#fff',
+                  padding: '6px 14px',
+                  borderRadius: '99px',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+                title="Go Back"
+              >
+                ← Back
+              </button>
+              <div className="student-badge" style={{ margin: 0 }}>Attendance Report</div>
+            </div>
             <h1 className="student-title">Attendance Tracking</h1>
             <p className="student-text">
               View your overall presence summary. Students are required to maintain a minimum of 75% attendance to be eligible for end semester examinations.
             </p>
           </div>
         </section>
+
 
         {/* Dynamic Alert Banner */}
         <div className={`info-alert-card ${isSafe ? 'safe' : 'risk'}`}>
@@ -597,13 +617,33 @@ export function Percentage() {
         {/* Welcome Section */}
         <section className="student-hero" style={{ minHeight: 'auto', marginBottom: 32 }}>
           <div className="student-copy">
-            <div className="student-badge">Academic Transcript</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+              <button
+                type="button"
+                onClick={() => window.history.back()}
+                style={{
+                  background: 'rgba(255,255,255,0.1)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  color: '#fff',
+                  padding: '6px 14px',
+                  borderRadius: '99px',
+                  fontWeight: 600,
+                  fontSize: '0.85rem',
+                  cursor: 'pointer'
+                }}
+                title="Go Back"
+              >
+                ← Back
+              </button>
+              <div className="student-badge" style={{ margin: 0 }}>Academic Transcript</div>
+            </div>
             <h1 className="student-title">Academic Records</h1>
             <p className="student-text">
               Track your coursework details, scores in mid-term (Internal) and end-term (External) examinations, and projected GPA rankings.
             </p>
           </div>
         </section>
+
 
         {/* Stat Highlights Card */}
         <section className="stats-summary-grid" style={{ marginBottom: 32 }}>
