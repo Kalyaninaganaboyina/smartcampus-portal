@@ -5,7 +5,4 @@ __pycache__/
 .env
 backend/.env
 node_modules/
-backend/smartcampus.db
-backend/smartcampus.db-shm
-backend/smartcampus.db-wal
 backend/uploads/
