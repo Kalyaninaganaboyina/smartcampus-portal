@@ -1,0 +1,16 @@
+{
+  "short_name": "Amrita Sai Portal",
+  "name": "Amrita Sai Smart Campus Portal",
+  "description": "Academic, Attendance, Marks, and Fee Management Portal for Amrita Sai Institute of Science and Technology",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0f172a",
+  "theme_color": "#4f46e5",
+  "display": "standalone"
+}

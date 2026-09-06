@@ -262,92 +262,81 @@ function App({ initialRole = null }) {
         <SetNameModal token={pendingToken} onComplete={handleNameSet} />
       )}
       <div className="login-card">
+        {/* Back Button */}
+        <button
+          type="button"
+          className="back-btn"
+          onClick={role === null ? () => window.location.href = '/' : handleBackToRoleSelection}
+          title="Back to previous"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Back</span>
+        </button>
+
+        {/* Brand Header */}
+        <div className="brand-header">
+          <span className="brand-logo" role="img" aria-label="Graduation Cap">
+            {role === 'faculty' ? '💼' : '🎓'}
+          </span>
+          <div className="brand-text-container">
+            <h1 className="brand-title-main">Amrita Sai Institute of Science and Technology</h1>
+            <h1 className="brand-title-main">Portal</h1>
+          </div>
+        </div>
+        <p className="brand-subtitle">
+          {role === null
+            ? 'Select your portal to log in'
+            : role === 'faculty'
+              ? 'Faculty Login'
+              : role === 'admin'
+                ? 'Admin Login'
+                : 'Student / Parent Login'}
+        </p>
+
         {role === null ? (
-          <>
-            {/* Header */}
-            <div className="brand-header">
-              <span className="brand-logo" role="img" aria-label="Graduation Cap">🎓</span>
-              <div className="brand-text-container">
-                <h1 className="brand-title-main">Amrita Sai Institute of Science and Technology</h1>
-                <h1 className="brand-title-main">Portal</h1>
+          <div className="role-selection-container">
+            <button
+              type="button"
+              className="role-card"
+              onClick={() => setRole('faculty')}
+            >
+              <div className="role-icon">👨‍🏫</div>
+              <div className="role-details">
+                <span className="role-title">Faculty Portal</span>
+                <span className="role-desc">Sign in to manage classes, grades, and schedules</span>
               </div>
-            </div>
-            <p className="brand-subtitle">Select your portal to log in</p>
+            </button>
 
-            <div className="role-selection-container">
-              <button 
-                type="button" 
-                className="role-card" 
-                onClick={() => setRole('faculty')}
-              >
-                <div className="role-icon">👨‍🏫</div>
-                <div className="role-details">
-                  <span className="role-title">Faculty Portal</span>
-                  <span className="role-desc">Sign in to manage classes, grades, and schedules</span>
-                </div>
-              </button>
-
-              <button 
-                type="button" 
-                className="role-card" 
-                onClick={() => setRole('student')}
-              >
-                <div className="role-icon">🎓</div>
-                <div className="role-details">
-                  <span className="role-title">Student / Parent Portal</span>
-                  <span className="role-desc">Sign in to view classes, academic records, and fees</span>
-                </div>
-              </button>
-
-              
-            </div>
-          </>
+            <button
+              type="button"
+              className="role-card"
+              onClick={() => setRole('student')}
+            >
+              <div className="role-icon">🎓</div>
+              <div className="role-details">
+                <span className="role-title">Student / Parent Portal</span>
+                <span className="role-desc">Sign in to view classes, academic records, and fees</span>
+              </div>
+            </button>
+          </div>
         ) : isSuccess ? (
           <div className="success-banner">
             <div className="success-icon">🎉</div>
             <h2>Welcome Back, {role === 'faculty' ? 'Faculty' : role === 'admin' ? 'Admin' : 'Student'}!</h2>
             <p>Login successful. Redirecting to your dashboard...</p>
-            
           </div>
         ) : (
           <>
-            {/* Back Button */}
-            <button 
-              type="button" 
-              className="back-btn" 
-              onClick={handleBackToRoleSelection}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="19" y1="12" x2="5" y2="12"></line>
-                <polyline points="12 19 5 12 12 5"></polyline>
-              </svg>
-              <span>Back</span>
-            </button>
-
-            {/* Header */}
-            <div className="brand-header">
-              <span className="brand-logo" role="img" aria-label="Graduation Cap">
-                {role === 'faculty' ? '💼' : '🎓'}
-              </span>
-              <div className="brand-text-container">
-                <h1 className="brand-title-main">Amrita Sai Institute of Science and Technology</h1>
-                <h1 className="brand-title-main">Portal</h1>
-              </div>
-            </div>
-            <p className="brand-subtitle">
-              {role === 'faculty'
-                ? 'Faculty Login'
-                : role === 'admin'
-                ? 'Admin Login'
-                : 'Student/Parent Login'}
-            </p>
-
             {/* Form */}
             <form onSubmit={handleSubmit} className="login-form" noValidate>
+
               {loginError && (
                 <div className="login-error">{loginError}</div>
               )}
-              
+
               {/* Email Field */}
               <div className="form-group">
                 <label htmlFor="email" className="form-label">
@@ -362,8 +351,8 @@ function App({ initialRole = null }) {
                       role === 'faculty'
                         ? 'faculty@campus.edu'
                         : role === 'admin'
-                        ? 'admin@campus.edu'
-                        : 'studentrollno@amritasai.orgg.in'
+                          ? 'admin@campus.edu'
+                          : 'studentrollno@amritasai.orgg.in'
                     }
                     value={email}
                     onChange={(e) => {
@@ -450,7 +439,9 @@ function App({ initialRole = null }) {
             </form>
           </>
         )}
+
       </div>
+
     </div>
   )
 }
