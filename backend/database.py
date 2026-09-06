@@ -7,8 +7,7 @@ db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "smartcampus.d
 DATABASE_URL = os.getenv("DATABASE_URL")
 
 if not DATABASE_URL or DATABASE_URL.startswith("sqlite"):
-    if not DATABASE_URL:
-        DATABASE_URL = f"sqlite:///{db_path}"
+    DATABASE_URL = f"sqlite:///{db_path}"
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 else:
     try:
